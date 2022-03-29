@@ -1,7 +1,6 @@
 package Menu;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 
 import Base.Console;
 import Base.Console.MoveDirection;
@@ -9,20 +8,20 @@ import Utils.IO;
 
 public class Menu {
 	private List<MenuItem> items;
-	private List<MenuItem> headers;
+	private List<HeaderItem> headers;
 	private String name;
 
 	public Menu(String name) { 
 		this.name = name;
 		this.items = new ArrayList<MenuItem>();
-		this.headers = new ArrayList<MenuItem>();
+		this.headers = new ArrayList<HeaderItem>();
 	}
 
 	public void addItem(MenuItem item) {
 		items.add(item);
 	}
 
-	public void addHeader(MenuItem item) {
+	public void addHeader(HeaderItem item) {
 		this.headers.add(item);
 	}
 	
@@ -52,7 +51,7 @@ public class Menu {
 
 		Console.setNormal();
 		if (headers.size() > 0) Console.moveCursor(MoveDirection.UP, 1);
-		for (MenuItem header : headers) {
+		for (HeaderItem header : headers) {
 			Console.setForeground(header.foreground);
 			String formattedText = String.format(header.text, header.textArgs);
 			Console.setCursorCol(alignRight(formattedText));
@@ -75,6 +74,7 @@ public class Menu {
 			i++;
 		}
 		Console.resetColors();
+		Console.println("");
 
 		int selected = IO.scanInt("Válasszon", 1, this.items.size()) - 1;
 		MenuItem selectedItem = this.items.get(selected);

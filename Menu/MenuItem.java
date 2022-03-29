@@ -9,7 +9,7 @@ public class MenuItem {
 	Object[] textArgs;
 	boolean redrawSelf;
 
-	public MenuItem(String text, RGB foreground, boolean redrawSelf, Runnable action, Object... textArgs) {
+	public MenuItem(RGB foreground, Runnable action, boolean redrawSelf, String text, Object... textArgs) {
 		this.text = text;
 		// this.background = background;
 		this.foreground = foreground;
