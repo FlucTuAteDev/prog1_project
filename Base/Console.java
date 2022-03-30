@@ -49,6 +49,10 @@ public class Console {
 		}
 	}
 
+	public static int alignCenter(int width, String text) {
+		return (int)Math.floor(width / 2.0 - text.length() / 2.0);
+	}
+
 	public static void setCursorCol(int col) {
 		print(ANSI.ESC + "[" + col + "G");
 	}
@@ -58,6 +62,7 @@ public class Console {
 	}
 
 	public static void moveCursor(MoveDirection direction, int amount) {
+		if (amount < 1) return;
 		print(ANSI.ESC + "[" + amount + direction.getChar());
 	}
 
@@ -90,11 +95,17 @@ public class Console {
 	}
 
 	public static void setForeground(RGB color) {
-		print(ANSI.ESC + "[38;2;" + color.r + ";" + color.g + ";" + color.b + "m");
+		if (color == null) 
+			resetColors();
+		else
+			print(ANSI.ESC + "[38;2;" + color.r + ";" + color.g + ";" + color.b + "m");
 	}
 
 	public static void setBackground(RGB color) {
-		print(ANSI.ESC + "[48;2;" + color.r + ";" + color.g + ";" + color.b + "m");
+		if (color == null) 
+			resetColors();
+		else
+			print(ANSI.ESC + "[48;2;" + color.r + ";" + color.g + ";" + color.b + "m");
 	}
 
 	public static void setBold() {

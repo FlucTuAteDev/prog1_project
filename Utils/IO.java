@@ -33,4 +33,9 @@ public class IO {
 
 		return selected;
 	}
+
+	public static int[] scanIntPair(String text, int minX, int maxX, int minY, int maxY) {
+		Console.print(String.format("%s [%d - %d, %d - %d]", text, minX, maxX, minY, maxY));
+		return new int[] {0, 0};
+	}
 }
