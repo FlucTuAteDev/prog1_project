@@ -144,7 +144,7 @@ public class Game {
 
 						// int amount = IO.scanInt("Darab", 1, maxAmount);
 						int amount = (int) IO.scanAndConvert(String.format("Darab [%d - %d]", 1, maxAmount),
-								Converters.convertInt(1, maxAmount)).get(0);
+								Converters.convertInt(1, maxAmount + 1)).get(0);
 
 						unit.setCount(unit.getCount().get() + amount);
 

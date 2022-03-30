@@ -63,7 +63,7 @@ public class Menu {
 			Console.println(formattedText);
 		}
 
-		Console.resetColors();
+		Console.resetStyles();
 		Console.println("-".repeat(Console.WIDTH));
 
 		// Display items with indices
@@ -77,7 +77,7 @@ public class Menu {
 			Console.println(text);
 			i++;
 		}
-		Console.resetColors();
+		Console.resetStyles();
 		Console.println("");
 
 		int selected = (int) IO.scanAndConvert(String.format("Válasszon [%d - %d]", 1, this.items.size()),

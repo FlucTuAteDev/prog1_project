@@ -46,7 +46,7 @@ public class IO {
 			} catch (Exception e) {
 				Console.moveCursor(Console.MoveDirection.UP, 1);
 				Console.clearLine();
-				Console.resetColors();
+				Console.resetStyles();
 				Console.print(String.format("Hibás bemenet! %s: ", text));
 			}
 

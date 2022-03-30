@@ -88,20 +88,20 @@ public class Console {
 	/**
 	 * Color manipulation
 	 */
-	public static void resetColors() {
+	public static void resetStyles() {
 		print(ANSI.RESET_COLORS);
 	}
 
 	public static void setForeground(RGB color) {
 		if (color == null) 
-			resetColors();
+			resetStyles();
 		else
 			print(ANSI.ESC + "[38;2;" + color.r + ";" + color.g + ";" + color.b + "m");
 	}
 
 	public static void setBackground(RGB color) {
 		if (color == null) 
-			resetColors();
+			resetStyles();
 		else
 			print(ANSI.ESC + "[48;2;" + color.r + ";" + color.g + ";" + color.b + "m");
 	}

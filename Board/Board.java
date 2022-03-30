@@ -21,10 +21,10 @@ public class Board {
 	private static final int BOARD_WIDTH = CELL_COLS * BOARD_COLS;
 	private static final int BOARD_HEIGHT = CELL_ROWS * BOARD_ROWS;
 
-	private final RGB lightBg = Colors.GRAY;
-	private final RGB darkBg = null;
+	private final RGB lightBg = Colors.LIGHT_GRAY;
+	private final RGB darkBg = Colors.DARK_GRAY;
 
-	private final RGB textOnLight = Colors.BLACK;
+	private final RGB textOnLight = null;
 	private final RGB textOnDark = null;
 
 	private final Hero user;
@@ -59,7 +59,7 @@ public class Board {
 	}
 
 	private void drawLabels() {
-		Console.resetColors();
+		Console.resetStyles();
 		// COLS
 		int rowID = 1;
 		for (int i = 1; i <= BOARD_HEIGHT; i += CELL_ROWS) {
@@ -98,7 +98,7 @@ public class Board {
 		Console.print(unit.getCount());
 		// Console.print();
 
-		Console.resetColors();
+		Console.resetStyles();
 	}
 
 	public void placeUnits() {
