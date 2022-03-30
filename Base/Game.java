@@ -163,14 +163,13 @@ public class Game {
 
 	private void update() {
 		board.drawBoard();
-		board.drawLabels();
-		
+		board.placeUnits();
+
 
 		Console.setCursorPosition(30, 0); // DEBUG
 	}
 
 	public void run() {
-		// this.init();
-		this.update();
+		this.init();
 	}
 }

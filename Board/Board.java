@@ -1,15 +1,14 @@
 package Board;
 
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.List;
 
 import Base.Console;
 import Base.Console.MoveDirection;
 import Hero.Hero;
-import Units.Archer;
-import Units.Farmer;
-import Units.Griff;
-import Units.Unit;
+import Units.*;
 import Utils.Colors;
+import Utils.IO;
 import Utils.Maths;
 import Utils.RGB;
 
@@ -23,7 +22,7 @@ public class Board {
 
 	private final RGB light = Colors.WHITE;
 	private final RGB textColor = Colors.RED;
-	
+
 	private final Hero user;
 	private final Hero ai;
 
@@ -37,22 +36,25 @@ public class Board {
 	public void drawBoard() {
 		Console.clearScreen();
 		for (int i = 0; i < BOARD_ROWS; i++) {
-			for (int j = 0; j < CELL_ROWS; j++) { // Each row has to be the same color
-				for (int k = 0; k < BOARD_COLS; k++) {
-					Console.setBackground((k + i) % 2 == 0 ? Colors.WHITE : null);
-					if (board[i][k] == null)
-						Console.print(" ".repeat(CELL_COLS));
-					else
-						this.drawUnit(board[i][k], i, k);
-				}
-				Console.println("");
+			for (int j = 0; j < BOARD_COLS; j++) {
+				int screenRow = i * CELL_ROWS + 1;
+				int screenCol = j * CELL_COLS + 1;
+				Console.setBackground((i + j) % 2 == 0 ? Colors.WHITE : null);
+				Console.setCursorPosition(screenRow, screenCol);
+				Console.print(" ".repeat(CELL_COLS));
+
+				Console.setCursorPosition(screenRow + 1, screenCol);
+				Console.print(" ".repeat(CELL_COLS));
+
+				if (board[i][j] != null)
+					this.drawUnit(board[i][j], i, j);
 			}
-			// Console.println("");
+			Console.println("");
 		}
-		Console.resetColors();
+		this.drawLabels();
 	}
 
-	public void drawLabels() {
+	private void drawLabels() {
 		Console.resetColors();
 		// ROWS
 		char rowID = 'a';
@@ -64,15 +66,17 @@ public class Board {
 
 		// COLS
 		int colID = 1;
+		Console.setCursorPosition(BOARD_HEIGHT + 1, 0);
 		for (int i = 1; i < BOARD_WIDTH; i += CELL_COLS) {
-			Console.setCursorPosition(BOARD_HEIGHT + 1, i);
+			Console.setCursorCol(i);
 			Console.print(String.format("%2d", colID));
 			colID++;
 		}
 	}
 
 	private void drawUnit(Unit unit, int row, int col) {
-		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS)) return;
+		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS))
+			return;
 
 		RGB color = (row + col) % 2 == 0 ? light : null;
 		int screenRow = row * CELL_ROWS + 1;
@@ -82,7 +86,7 @@ public class Board {
 		Console.setForeground(textColor);
 
 		Console.setCursorCol(screenCol + Console.alignCenter(CELL_COLS, unit.icon));
-		Console.print(unit.icon); 
+		Console.print(unit.icon);
 		Console.moveCursor(MoveDirection.DOWN, 1);
 		Console.setCursorCol(screenCol + Console.alignCenter(CELL_COLS, unit.getCount().toString()));
 		Console.print(unit.getCount());
@@ -91,14 +95,39 @@ public class Board {
 		Console.resetColors();
 	}
 
-	private void placeUnits() {
-		Console.setCursorPosition(BOARD_HEIGHT + 3, 0);
+	public void placeUnits() {
+		List<Object> values = new ArrayList<>();
 		
-	}
+		for (var kv : user.getUnits()) {
+			Unit unit = kv.getValue();
+			// if (unit.getCount().get() == 0) continue;
+			
+			char lastChar = 'a' + BOARD_ROWS - 1;
+			
+			Console.setCursorPosition(BOARD_HEIGHT + 3, 0);
+			Console.println(String.format("Válaszd ki, hogy hova rakod: %s (%s, %s db)", unit.name, unit.icon,
+					unit.getCount()));
+			values = IO.scanAndConvert(String.format("[%c - %c, %d - %d]", 'a', lastChar, 1, BOARD_COLS),
+					x -> {
+						char r = x.charAt(0);
+						if (x.length() != 1 || r < 'a' || r > lastChar)
+							throw new Exception();
 
-	private void setUnit(Unit unit, int row, int col) {
-		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS)) return;
+						return r;
+					},
+					x -> {
+						int a = Integer.parseInt(x);
+						if (!Maths.inRange(a, 1, BOARD_COLS + 1))
+							throw new Exception();
 
-		this.board[row][col] = unit;
+						return a;
+					});
+
+			int row = (int) ((char) values.get(0) - 'a');
+			int col = (int) values.get(1) - 1;
+
+			board[row][col] = unit;
+			this.drawBoard();
+		}
 	}
 }
