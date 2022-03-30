@@ -11,6 +11,7 @@ import Utils.Colors;
 import Utils.IO;
 import Utils.Maths;
 import Utils.RGB;
+import Utils.Functions.Converters;
 
 public class Board {
 	private static final int BOARD_COLS = 12;
@@ -20,8 +21,11 @@ public class Board {
 	private static final int BOARD_WIDTH = CELL_COLS * BOARD_COLS;
 	private static final int BOARD_HEIGHT = CELL_ROWS * BOARD_ROWS;
 
-	private final RGB light = Colors.WHITE;
-	private final RGB textColor = Colors.RED;
+	private final RGB lightBg = Colors.GRAY;
+	private final RGB darkBg = null;
+
+	private final RGB textOnLight = Colors.BLACK;
+	private final RGB textOnDark = null;
 
 	private final Hero user;
 	private final Hero ai;
@@ -39,7 +43,7 @@ public class Board {
 			for (int j = 0; j < BOARD_COLS; j++) {
 				int screenRow = i * CELL_ROWS + 1;
 				int screenCol = j * CELL_COLS + 1;
-				Console.setBackground((i + j) % 2 == 0 ? Colors.WHITE : null);
+				Console.setBackground((i + j) % 2 == 0 ? lightBg : darkBg);
 				Console.setCursorPosition(screenRow, screenCol);
 				Console.print(" ".repeat(CELL_COLS));
 
@@ -56,20 +60,20 @@ public class Board {
 
 	private void drawLabels() {
 		Console.resetColors();
-		// ROWS
-		char rowID = 'a';
+		// COLS
+		int rowID = 1;
 		for (int i = 1; i <= BOARD_HEIGHT; i += CELL_ROWS) {
 			Console.setCursorPosition(i, BOARD_WIDTH + 1);
-			Console.print(rowID);
+			Console.print(String.format("%2d", rowID));
 			rowID++;
 		}
 
-		// COLS
-		int colID = 1;
+		// ROWS
+		char colID = 'a';
 		Console.setCursorPosition(BOARD_HEIGHT + 1, 0);
 		for (int i = 1; i < BOARD_WIDTH; i += CELL_COLS) {
 			Console.setCursorCol(i);
-			Console.print(String.format("%2d", colID));
+			Console.print(colID);
 			colID++;
 		}
 	}
@@ -78,12 +82,14 @@ public class Board {
 		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS))
 			return;
 
-		RGB color = (row + col) % 2 == 0 ? light : null;
 		int screenRow = row * CELL_ROWS + 1;
 		int screenCol = col * CELL_COLS + 1;
 		Console.setCursorPosition(screenRow, screenCol);
-		Console.setBackground(color);
-		Console.setForeground(textColor);
+
+		RGB bg = (row + col) % 2 == 0 ? lightBg : darkBg;
+		RGB fg = (row + col) % 2 == 0 ? textOnLight : textOnDark;
+		Console.setBackground(bg);
+		Console.setForeground(fg);
 
 		Console.setCursorCol(screenCol + Console.alignCenter(CELL_COLS, unit.icon));
 		Console.print(unit.icon);
@@ -97,34 +103,28 @@ public class Board {
 
 	public void placeUnits() {
 		List<Object> values = new ArrayList<>();
-		
+
 		for (var kv : user.getUnits()) {
 			Unit unit = kv.getValue();
 			// if (unit.getCount().get() == 0) continue;
-			
-			char lastChar = 'a' + BOARD_ROWS - 1;
-			
+
+			char lastChar = 'a' + BOARD_COLS - 1;
+
 			Console.setCursorPosition(BOARD_HEIGHT + 3, 0);
 			Console.println(String.format("Válaszd ki, hogy hova rakod: %s (%s, %s db)", unit.name, unit.icon,
 					unit.getCount()));
-			values = IO.scanAndConvert(String.format("[%c - %c, %d - %d]", 'a', lastChar, 1, BOARD_COLS),
+			values = IO.scanAndConvert(String.format("[Sor: %d - %d, Oszlop: %c - %c]", 1, BOARD_ROWS, 'a', lastChar),
+					Converters.convertInt(1, BOARD_COLS + 1),
 					x -> {
 						char r = x.charAt(0);
 						if (x.length() != 1 || r < 'a' || r > lastChar)
 							throw new Exception();
 
 						return r;
-					},
-					x -> {
-						int a = Integer.parseInt(x);
-						if (!Maths.inRange(a, 1, BOARD_COLS + 1))
-							throw new Exception();
-
-						return a;
 					});
 
-			int row = (int) ((char) values.get(0) - 'a');
-			int col = (int) values.get(1) - 1;
+			int row = (int) values.get(0) - 1;
+			int col = (int) ((char) values.get(1) - 'a');
 
 			board[row][col] = unit;
 			this.drawBoard();

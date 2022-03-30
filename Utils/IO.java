@@ -1,43 +1,15 @@
 package Utils;
 
 import Base.Console;
+import Utils.Functions.ConverterFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
-import Utils.Functions.ConverterFunction;
 
 public class IO {
 	static Scanner sc = new Scanner(System.in);
-
-	public static int scanInt(String text, int min, int max) {
-		Console.print(text + " [" + min + " - " + max + "]: ");
-		int selected = -1;
-		while(true) {
-			try {
-				selected = Integer.parseInt(sc.nextLine());
-
-				// Only quit if input is in the given range
-				if (Maths.inRange(selected, min, max + 1))
-					break;
-				
-				throw new Exception();
-			} catch (Exception e) {
-				Console.moveCursor(Console.MoveDirection.UP, 1);
-				Console.clearLine();
-				Console.resetColors();
-				Console.print("Hibás bemenet! Kérem válasszon újra! [" + min + " - " + max + "]: ");
-			} finally {
-				// sc.nextLine();
-			}
-		}
-
-		Console.moveCursor(Console.MoveDirection.UP, 1);
-		Console.clearLine();
-
-		return selected;
-	}
 
 	/**
 	 * Scans n comma separated objects given by the number of converter functions
@@ -57,8 +29,8 @@ public class IO {
 		while(true) {
 			try {
 				String current = sc.nextLine();
-				// Splits the string at the ','-s, trims them and takes the ones that are not empty
-				List<String> vals = Arrays.stream(current.split(","))
+				// Splits the string at the delimiter, trims them and takes the ones that are not empty
+				List<String> vals = Arrays.stream(current.split(" "))
 					.map(x -> x.trim())
 					.filter(x -> !x.isEmpty())
 					.toList();

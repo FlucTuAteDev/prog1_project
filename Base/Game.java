@@ -9,6 +9,7 @@ import Menu.*;
 import Spells.Spell;
 import Units.Unit;
 import Utils.*;
+import Utils.Functions.Converters;
 
 public class Game {
 	RGB white = new RGB(255, 255, 255);
@@ -141,7 +142,10 @@ public class Game {
 						if (maxAmount == 0)
 							return; // TODO: error message
 
-						int amount = IO.scanInt("Darab", 1, maxAmount);
+						// int amount = IO.scanInt("Darab", 1, maxAmount);
+						int amount = (int) IO.scanAndConvert(String.format("Darab [%d - %d]", 1, maxAmount),
+								Converters.convertInt(1, maxAmount)).get(0);
+
 						unit.setCount(unit.getCount().get() + amount);
 
 						money.addAndGet(-(amount * unit.price));
@@ -164,7 +168,6 @@ public class Game {
 	private void update() {
 		board.drawBoard();
 		board.placeUnits();
-
 
 		Console.setCursorPosition(30, 0); // DEBUG
 	}

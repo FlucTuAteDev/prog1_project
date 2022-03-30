@@ -75,8 +75,6 @@ public class Console {
 		} catch (Exception e) {
 			Console.println(e);
 		}
-		// print(ANSI.ERASE_SCREEN);
-		// print(ANSI.HOME);
 	}
 
 	public static void clearLine() {

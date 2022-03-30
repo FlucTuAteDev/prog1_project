@@ -6,6 +6,7 @@ import java.util.List;
 import Base.Console;
 import Base.Console.MoveDirection;
 import Utils.IO;
+import Utils.Functions.Converters;
 
 public class Menu {
 	private List<MenuItem> items;
@@ -50,7 +51,8 @@ public class Menu {
 		Console.setCursorCol(alignCenter(this.name));
 		Console.println(this.name);
 
-		// If there are no elements in the list the cursor would stay next to the menu's name
+		// If there are no elements in the list the cursor would stay next to the menu's
+		// name
 		if (headers.size() > 0)
 			Console.moveCursor(MoveDirection.UP, 1);
 
@@ -73,12 +75,14 @@ public class Menu {
 			Console.setForeground(item.foreground);
 			Console.setCursorCol(alignCenter(text));
 			Console.println(text);
-			i++; 
+			i++;
 		}
 		Console.resetColors();
 		Console.println("");
 
-		int selected = IO.scanInt("Válasszon", 1, this.items.size()) - 1;
+		int selected = (int) IO.scanAndConvert(String.format("Válasszon [%d - %d]", 1, this.items.size()),
+				Converters.convertInt(1, this.items.size() + 1)).get(0) - 1;
+
 		MenuItem selectedItem = this.items.get(selected);
 		selectedItem.action.run();
 		if (selectedItem.redrawSelf)
