@@ -1,10 +1,10 @@
 package Hero;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import Spells.Fireball;
 import Spells.Resurrection;
@@ -19,7 +19,7 @@ public class Hero {
 	private Map<String, Spell> spells = new LinkedHashMap<>();
 	private Map<String, Unit> units = new LinkedHashMap<>();
 
-	public AtomicInteger skillPrice = new AtomicInteger(5);
+	private int skillPrice = 5;
 
 	public Hero() {
 		skills.put("attack", new Skill("Támadás", 1));
@@ -38,27 +38,31 @@ public class Hero {
 		units.put("griff", new Griff());
 	}
 
-	private static void incrementPrice(AtomicInteger a) {
-		int res = (int)Math.ceil((double)a.get() * 1.1);
-		a.set(res);
+	private void incrementPrice() {
+		this.skillPrice = (int)Math.ceil((double)this.skillPrice * 1.1);
 	}
 	
-	public AtomicInteger getSkillValue(String skill) { return skills.get(skill).value; }
-	public boolean addSkillValue(String skill, int amount) {
+	public int getSkillValue(String skill) { return skills.get(skill).value; }
+	public boolean addSkillValue(String skillName, int amount) {
 		if (amount < 1) return false;
 
-		AtomicInteger skillVal = skills.get(skill).value;
-		if (skillVal.get() + amount > MAX_SKILL) return false;
+		Skill skill = skills.get(skillName);
+		if (skill.value + amount > MAX_SKILL) return false;
 
-		skillVal.addAndGet(amount);
-		incrementPrice(this.skillPrice);
+		skill.value += amount;
+		incrementPrice();
 		return true;
 	}
 
-	public Set<Entry<String, Skill>> getSkills() { return skills.entrySet(); }
-	public Set<Entry<String, Spell>> getSpells() { return spells.entrySet(); }
-	public Set<Entry<String, Unit>> getUnits() { return units.entrySet(); }
+	public int getSkillPrice() { return skillPrice; }
 
-	public int getManna() { return skills.get("intelligence").value.get() * 10; }
+	public Set<Entry<String, Skill>> getSkills() { return skills.entrySet(); }
+	public Collection<Skill> getSkillValues() { return skills.values(); }
+	public Set<Entry<String, Spell>> getSpells() { return spells.entrySet(); }
+	public Collection<Spell> getSpellValues() { return spells.values(); }
+	public Set<Entry<String, Unit>> getUnits() { return units.entrySet(); }
+	public Collection<Unit> getUnitValues() { return units.values(); }
+
+	public int getManna() { return skills.get("intelligence").value * 10; }
 
 }

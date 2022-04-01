@@ -1,6 +1,7 @@
 package Menu;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import Base.Console;
@@ -58,7 +59,9 @@ public class Menu {
 
 		for (HeaderItem header : headers) {
 			Console.setForeground(header.foreground);
-			String formattedText = String.format(header.text, header.textArgs);
+
+			String formattedText = String.format(header.text, header.evaluateArgs());
+
 			Console.setCursorCol(alignRight(formattedText));
 			Console.println(formattedText);
 		}
@@ -69,7 +72,8 @@ public class Menu {
 		// Display items with indices
 		int i = 0;
 		for (var item : this.items) {
-			String formattedText = String.format(item.text, item.textArgs);
+			// Run the item's functions
+			String formattedText = String.format(item.text, item.evaluateArgs());
 			String text = String.format("%d - %s", i + 1, formattedText);
 			// Console.setBackground(item.background);
 			Console.setForeground(item.foreground);

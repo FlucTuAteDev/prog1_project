@@ -12,4 +12,14 @@ public class Converters {
 			return parsed;
 		};
 	}
+
+	public static ConverterFunction<String, Object> convertChar(char min, char max) {
+		return x -> {
+			char r = x.charAt(0);
+			if (x.length() != 1 || r < min || r > max)
+				throw new Exception();
+
+			return r;
+		};
+	}
 }

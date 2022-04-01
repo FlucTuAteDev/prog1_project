@@ -1,15 +1,13 @@
 package Units;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 import Hero.Hero;
 
-public abstract class Unit {
+public abstract class Unit implements Comparable<Unit> {
 	Hero hero;
-	AtomicInteger count;
+	int count;
+	
 	public final String name;
 	public final String icon;
-
 	public final int price;
 	public final int minDamage;
 	public final int maxDamage;
@@ -20,7 +18,7 @@ public abstract class Unit {
 	public Unit(String name, String icon, int price, int minDamage, int maxDamage, int health, int speed, int initiative) {
 		this.name = name;
 		this.icon = icon;
-		this.count = new AtomicInteger(0);
+		this.count = 0;
 
 		this.price = price;
 		this.minDamage = minDamage;
@@ -35,12 +33,17 @@ public abstract class Unit {
 		this.hero = hero;
 	}
 
-	public AtomicInteger getCount() {
+	public int getCount() {
 		return this.count;
 	}
 	
 	public void setCount(int count) {
-		if (count < 0) this.count.set(0);
-		else this.count.set(count);
+		if (count < 0) this.count = 0;
+		else this.count = count;
+	}
+
+	@Override
+	public int compareTo(Unit other) {
+		return other.initiative - this.initiative;
 	}
 }

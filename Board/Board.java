@@ -2,9 +2,11 @@ package Board;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import Base.Console;
-import Base.Console.MoveDirection;
 import Hero.Hero;
 import Units.*;
 import Utils.Colors;
@@ -20,35 +22,56 @@ public class Board {
 	private static final int CELL_COLS = CELL_ROWS * 2;
 	private static final int BOARD_WIDTH = CELL_COLS * BOARD_COLS;
 	private static final int BOARD_HEIGHT = CELL_ROWS * BOARD_ROWS;
+	private static final int BOARD_OFFSET = Console.WIDTH / 2 - BOARD_WIDTH / 2;
 
-	private final RGB lightBg = Colors.LIGHT_GRAY;
-	private final RGB darkBg = Colors.DARK_GRAY;
+	private final RGB lightBg = Colors.WHITE;
+	private final RGB darkBg = Colors.BLACK;
 
-	private final RGB textOnLight = null;
-	private final RGB textOnDark = null;
+	private final RGB textOnLight = Colors.BLACK;
+	private final RGB textOnDark = Colors.WHITE;
 
 	private final Hero user;
 	private final Hero ai;
 
+	SortedSet<Unit> units = new TreeSet<>();
 	private Unit[][] board = new Unit[BOARD_ROWS][BOARD_COLS];
 
 	public Board(Hero user) {
 		this.user = user;
 		this.ai = new Hero(); // TODO: Random generation
+		
+		// DEBUG ONLY
+		for (var u : ai.getUnits()) {
+			String name = u.getKey();
+			Unit unit = u.getValue();
+
+			unit.setCount(50);
+		}
+	}
+
+	private void setCursorTo(int row, int col) {
+		setCursorTo(row, col, 0, 0);
+	}
+
+	private void setCursorTo(int row, int col, int rOffset, int cOffset) {
+		int screenRow = row * CELL_ROWS + 1 + rOffset;
+		int screenCol = col * CELL_COLS + 1 + cOffset + BOARD_OFFSET;
+
+		Console.setBackground(isLight(row, col) ? lightBg : darkBg);
+		Console.setForeground(isLight(row, col) ? textOnLight : textOnDark);
+
+		Console.setCursorPosition(screenRow, screenCol);
+	}
+
+	private boolean isLight(int row, int col) {
+		return (row + col) % 2 == 0;
 	}
 
 	public void drawBoard() {
 		Console.clearScreen();
 		for (int i = 0; i < BOARD_ROWS; i++) {
 			for (int j = 0; j < BOARD_COLS; j++) {
-				int screenRow = i * CELL_ROWS + 1;
-				int screenCol = j * CELL_COLS + 1;
-				Console.setBackground((i + j) % 2 == 0 ? lightBg : darkBg);
-				Console.setCursorPosition(screenRow, screenCol);
-				Console.print(" ".repeat(CELL_COLS));
-
-				Console.setCursorPosition(screenRow + 1, screenCol);
-				Console.print(" ".repeat(CELL_COLS));
+				clearCell(i, j);
 
 				if (board[i][j] != null)
 					this.drawUnit(board[i][j], i, j);
@@ -63,8 +86,8 @@ public class Board {
 		// COLS
 		int rowID = 1;
 		for (int i = 1; i <= BOARD_HEIGHT; i += CELL_ROWS) {
-			Console.setCursorPosition(i, BOARD_WIDTH + 1);
-			Console.print(String.format("%2d", rowID));
+			Console.setCursorPosition(i, BOARD_OFFSET - 1);
+			Console.print(rowID);
 			rowID++;
 		}
 
@@ -72,7 +95,7 @@ public class Board {
 		char colID = 'a';
 		Console.setCursorPosition(BOARD_HEIGHT + 1, 0);
 		for (int i = 1; i < BOARD_WIDTH; i += CELL_COLS) {
-			Console.setCursorCol(i);
+			Console.setCursorCol(i + BOARD_OFFSET);
 			Console.print(colID);
 			colID++;
 		}
@@ -82,52 +105,62 @@ public class Board {
 		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS))
 			return;
 
-		int screenRow = row * CELL_ROWS + 1;
-		int screenCol = col * CELL_COLS + 1;
-		Console.setCursorPosition(screenRow, screenCol);
+		units.add(unit);
+		board[row][col] = unit;
 
-		RGB bg = (row + col) % 2 == 0 ? lightBg : darkBg;
-		RGB fg = (row + col) % 2 == 0 ? textOnLight : textOnDark;
-		Console.setBackground(bg);
-		Console.setForeground(fg);
-
-		Console.setCursorCol(screenCol + Console.alignCenter(CELL_COLS, unit.icon));
+		setCursorTo(row, col, 0, Console.alignCenter(CELL_COLS, unit.icon));
 		Console.print(unit.icon);
-		Console.moveCursor(MoveDirection.DOWN, 1);
-		Console.setCursorCol(screenCol + Console.alignCenter(CELL_COLS, unit.getCount().toString()));
+		setCursorTo(row, col, 1, Console.alignCenter(CELL_COLS, String.valueOf(unit.getCount())));
 		Console.print(unit.getCount());
-		// Console.print();
 
 		Console.resetStyles();
 	}
 
 	public void placeUnits() {
-		List<Object> values = new ArrayList<>();
-
-		for (var kv : user.getUnits()) {
-			Unit unit = kv.getValue();
+		// Asks the user where to draw each unit
+		for (Unit unit : user.getUnitValues()) {
 			// if (unit.getCount().get() == 0) continue;
 
-			char lastChar = 'a' + BOARD_COLS - 1;
+			char lastPickableCol = 'a' + 1;
 
 			Console.setCursorPosition(BOARD_HEIGHT + 3, 0);
+			Console.clearLine();
 			Console.println(String.format("Válaszd ki, hogy hova rakod: %s (%s, %s db)", unit.name, unit.icon,
 					unit.getCount()));
-			values = IO.scanAndConvert(String.format("[Sor: %d - %d, Oszlop: %c - %c]", 1, BOARD_ROWS, 'a', lastChar),
-					Converters.convertInt(1, BOARD_COLS + 1),
-					x -> {
-						char r = x.charAt(0);
-						if (x.length() != 1 || r < 'a' || r > lastChar)
-							throw new Exception();
 
-						return r;
-					});
+			List<Object> values = IO.scanAndConvert(
+					String.format("[Oszlop: %c - %c, Sor: %d - %d]", 'a', lastPickableCol, 1, BOARD_ROWS),
+					Converters.convertChar('a', lastPickableCol),
+					Converters.convertInt(1, BOARD_COLS + 1));
 
-			int row = (int) values.get(0) - 1;
-			int col = (int) ((char) values.get(1) - 'a');
+			int col = (int) ((char) values.get(0) - 'a');
+			int row = (int) values.get(1) - 1;
 
 			board[row][col] = unit;
-			this.drawBoard();
+			this.drawUnit(unit, row, col);
 		}
+
+		Random rand = new Random();
+		for (Unit unit : ai.getUnitValues()) {
+			int row, col;
+			do {
+				row = rand.nextInt(BOARD_ROWS);
+				col = rand.nextInt(BOARD_COLS - 2, BOARD_COLS);
+			} while (board[row][col] != null);
+
+			board[row][col] = unit;
+			this.drawUnit(unit, row, col);
+		}
+	}
+
+	private void clearCell(int row, int col) {
+		for (int i = 0; i < CELL_ROWS; i++) {
+			setCursorTo(row, col, i, 0);
+			Console.print(" ".repeat(CELL_COLS));
+		}
+	}
+
+	public void moveUnit(Unit unit, int row, int col) {
+
 	}
 }

@@ -25,10 +25,12 @@ public class IO {
 		List<Object> res = new ArrayList<>();
 		int amt = converters.length;
 
+		Console.clearLine();
 		Console.print(String.format("%s: ", text));
 		while(true) {
 			try {
 				String current = sc.nextLine();
+
 				// Splits the string at the delimiter, trims them and takes the ones that are not empty
 				List<String> vals = Arrays.stream(current.split(" "))
 					.map(x -> x.trim())
@@ -41,7 +43,6 @@ public class IO {
 				for (int i = 0; i < amt; i++)
 					// Can throw an exception if the conversion fails
 					res.add(converters[i].apply(vals.get(i)));
-
 				break;
 			} catch (Exception e) {
 				Console.moveCursor(Console.MoveDirection.UP, 1);
@@ -49,7 +50,6 @@ public class IO {
 				Console.resetStyles();
 				Console.print(String.format("Hibás bemenet! %s: ", text));
 			}
-
 			res.clear();
 		}
 
