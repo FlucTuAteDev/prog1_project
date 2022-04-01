@@ -3,10 +3,10 @@ package Units;
 import Hero.Hero;
 
 public abstract class Unit implements Comparable<Unit> {
-	Hero hero;
 	int count;
 	
 	public final String name;
+	public final Hero hero;
 	public final String icon;
 	public final int price;
 	public final int minDamage;
@@ -15,22 +15,19 @@ public abstract class Unit implements Comparable<Unit> {
 	public final int speed;
 	public final int initiative;
 
-	public Unit(String name, String icon, int price, int minDamage, int maxDamage, int health, int speed, int initiative) {
+	public Unit(String name, String icon, Hero hero, int price, int minDamage, int maxDamage, int health, int speed, int initiative) {
 		this.name = name;
 		this.icon = icon;
-		this.count = 0;
-
+		this.hero = hero;
+		
 		this.price = price;
 		this.minDamage = minDamage;
 		this.maxDamage = maxDamage;
 		this.health = health;
 		this.speed = speed;
 		this.initiative = initiative;
-	}
-
-	public void setHero(Hero hero) {
-		if (hero == null) return;
-		this.hero = hero;
+		
+		this.count = 0;
 	}
 
 	public int getCount() {
@@ -44,6 +41,7 @@ public abstract class Unit implements Comparable<Unit> {
 
 	@Override
 	public int compareTo(Unit other) {
+		// Descending order
 		return other.initiative - this.initiative;
 	}
 }

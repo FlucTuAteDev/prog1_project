@@ -17,7 +17,6 @@ public class Hero {
 
 	private Map<String, Skill> skills = new LinkedHashMap<>();
 	private Map<String, Spell> spells = new LinkedHashMap<>();
-	private Map<String, Unit> units = new LinkedHashMap<>();
 
 	private int skillPrice = 5;
 
@@ -32,10 +31,6 @@ public class Hero {
 		spells.put("thunderbolt", new Thunderbolt());
 		spells.put("fireball", new Fireball());
 		spells.put("resurrect", new Resurrection());
-
-		units.put("farmer", new Farmer());
-		units.put("archer", new Archer());
-		units.put("griff", new Griff());
 	}
 
 	private void incrementPrice() {
@@ -54,14 +49,16 @@ public class Hero {
 		return true;
 	}
 
+	public Unit[] getUnitsFrom(Collection<Unit> units) {
+		return units.stream().filter(x -> x.hero == this).toArray(Unit[]::new);
+	}
+
 	public int getSkillPrice() { return skillPrice; }
 
 	public Set<Entry<String, Skill>> getSkills() { return skills.entrySet(); }
 	public Collection<Skill> getSkillValues() { return skills.values(); }
 	public Set<Entry<String, Spell>> getSpells() { return spells.entrySet(); }
 	public Collection<Spell> getSpellValues() { return spells.values(); }
-	public Set<Entry<String, Unit>> getUnits() { return units.entrySet(); }
-	public Collection<Unit> getUnitValues() { return units.values(); }
 
 	public int getManna() { return skills.get("intelligence").value * 10; }
 

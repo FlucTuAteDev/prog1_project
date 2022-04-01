@@ -9,20 +9,16 @@ import java.util.TreeSet;
 import Base.Console;
 import Hero.Hero;
 import Units.*;
-import Utils.Colors;
-import Utils.IO;
-import Utils.Maths;
-import Utils.RGB;
-import Utils.Functions.Converters;
+import Utils.*;
 
 public class Board {
-	private static final int BOARD_COLS = 12;
-	private static final int BOARD_ROWS = 10;
-	private static final int CELL_ROWS = 2;
-	private static final int CELL_COLS = CELL_ROWS * 2;
-	private static final int BOARD_WIDTH = CELL_COLS * BOARD_COLS;
-	private static final int BOARD_HEIGHT = CELL_ROWS * BOARD_ROWS;
-	private static final int BOARD_OFFSET = Console.WIDTH / 2 - BOARD_WIDTH / 2;
+	public static final int BOARD_COLS = 12;
+	public static final int BOARD_ROWS = 10;
+	public static final int CELL_ROWS = 2;
+	public static final int CELL_COLS = CELL_ROWS * 2;
+	public static final int BOARD_WIDTH = CELL_COLS * BOARD_COLS;
+	public static final int BOARD_HEIGHT = CELL_ROWS * BOARD_ROWS;
+	public static final int BOARD_OFFSET = Console.WIDTH / 2 - BOARD_WIDTH / 2;
 
 	private final RGB lightBg = Colors.WHITE;
 	private final RGB darkBg = Colors.BLACK;
@@ -30,23 +26,15 @@ public class Board {
 	private final RGB textOnLight = Colors.BLACK;
 	private final RGB textOnDark = Colors.WHITE;
 
-	private final Hero user;
+	private final Hero player;
 	private final Hero ai;
 
 	SortedSet<Unit> units = new TreeSet<>();
 	private Unit[][] board = new Unit[BOARD_ROWS][BOARD_COLS];
 
-	public Board(Hero user) {
-		this.user = user;
-		this.ai = new Hero(); // TODO: Random generation
-		
-		// DEBUG ONLY
-		for (var u : ai.getUnits()) {
-			String name = u.getKey();
-			Unit unit = u.getValue();
-
-			unit.setCount(50);
-		}
+	public Board(Hero player, Hero ai) {
+		this.player = player;
+		this.ai = ai;
 	}
 
 	private void setCursorTo(int row, int col) {
@@ -78,10 +66,8 @@ public class Board {
 			}
 			Console.println("");
 		}
-		this.drawLabels();
-	}
 
-	private void drawLabels() {
+		// Draw labels
 		Console.resetStyles();
 		// COLS
 		int rowID = 1;
@@ -101,7 +87,7 @@ public class Board {
 		}
 	}
 
-	private void drawUnit(Unit unit, int row, int col) {
+	public void drawUnit(Unit unit, int row, int col) {
 		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS))
 			return;
 
@@ -116,41 +102,32 @@ public class Board {
 		Console.resetStyles();
 	}
 
-	public void placeUnits() {
-		// Asks the user where to draw each unit
-		for (Unit unit : user.getUnitValues()) {
-			// if (unit.getCount().get() == 0) continue;
+	/**
+	 * 
+	 * @param cMin inclusive
+	 * @param cMax exclusive
+	 * @param rMin inclusive
+	 * @param rMax exclusive
+	 * @return
+	 */
+	public static Position scanPosition(int cMin, int cMax, int rMin, int rMax) {
+		// User input can range from min + 1 to max (1 based index)
+		// Position is returned from min to max - 1 (0 based index)
+		char firstCol = (char) ('a' + cMin);
+		char lastCol = (char) ('a' + cMax - 1);
+		// rMin = rMin + 1;
 
-			char lastPickableCol = 'a' + 1;
+		return (Position) IO.scanAndConvert(
+				String.format("[Oszlop: %c - %c Sor: %d - %d]", firstCol, lastCol, rMin + 1, rMax),
+				(String in) -> {
+					char c = in.charAt(0);
+					int r = Integer.parseInt(in.substring(1));
 
-			Console.setCursorPosition(BOARD_HEIGHT + 3, 0);
-			Console.clearLine();
-			Console.println(String.format("Válaszd ki, hogy hova rakod: %s (%s, %s db)", unit.name, unit.icon,
-					unit.getCount()));
+					if (c < firstCol || c > lastCol || r < rMin + 1 || r > rMax)
+						throw new Exception();
 
-			List<Object> values = IO.scanAndConvert(
-					String.format("[Oszlop: %c - %c, Sor: %d - %d]", 'a', lastPickableCol, 1, BOARD_ROWS),
-					Converters.convertChar('a', lastPickableCol),
-					Converters.convertInt(1, BOARD_COLS + 1));
-
-			int col = (int) ((char) values.get(0) - 'a');
-			int row = (int) values.get(1) - 1;
-
-			board[row][col] = unit;
-			this.drawUnit(unit, row, col);
-		}
-
-		Random rand = new Random();
-		for (Unit unit : ai.getUnitValues()) {
-			int row, col;
-			do {
-				row = rand.nextInt(BOARD_ROWS);
-				col = rand.nextInt(BOARD_COLS - 2, BOARD_COLS);
-			} while (board[row][col] != null);
-
-			board[row][col] = unit;
-			this.drawUnit(unit, row, col);
-		}
+					return new Position(r - 1, c - 'a');
+				}).get(0);
 	}
 
 	private void clearCell(int row, int col) {

@@ -1,8 +1,10 @@
 package Units;
 
+import Hero.Hero;
+
 public class Farmer extends Unit {
-	public Farmer() {
-		super("Földműves", "🔨", 2, 1, 1, 3, 4, 8);
+	public Farmer(Hero hero) {
+		super("Földműves", "🔨", hero, 2, 1, 1, 3, 4, 8);
 	}
 	
 }
