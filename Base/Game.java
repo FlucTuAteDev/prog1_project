@@ -3,6 +3,8 @@ package Base;
 import java.util.PriorityQueue;
 import java.util.Random;
 
+import javax.swing.text.StyledEditorKit.BoldAction;
+
 import Board.Board;
 import Hero.Hero;
 import Hero.Skill;
@@ -184,23 +186,20 @@ public class Game {
 			Console.setCursorPosition(Board.BOARD_HEIGHT + 3, 0);
 			Console.clearLine();
 			Console.println(String.format("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount()));
-
+			
 			Position pos = Board.scanPosition(0, 2, 0, Board.BOARD_ROWS);
 
 			board.drawUnit(unit, pos.row, pos.col);
 		}
 
-		// Random rand = new Random();
-		// for (Unit unit : ai.getUnitValues()) {
-		// 	int row, col;
-		// 	do {
-		// 		row = rand.nextInt(BOARD_ROWS);
-		// 		col = rand.nextInt(BOARD_COLS - 2, BOARD_COLS);
-		// 	} while (board[row][col] != null);
-
-		// 	board[row][col] = unit;
-		// 	this.drawUnit(unit, row, col);
-		// }
+		Random rand = new Random();
+		for (Unit unit : ai.getUnitsFrom(units)) {
+			int row, col;
+			do {
+				row = rand.nextInt(Board.BOARD_ROWS);
+				col = rand.nextInt(Board.BOARD_COLS - 2, Board.BOARD_COLS);
+			} while (!board.drawUnit(unit, row, col));
+		}
 	}
 
 	private void update() {

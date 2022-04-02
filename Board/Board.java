@@ -29,7 +29,6 @@ public class Board {
 	private final Hero player;
 	private final Hero ai;
 
-	SortedSet<Unit> units = new TreeSet<>();
 	private Unit[][] board = new Unit[BOARD_ROWS][BOARD_COLS];
 
 	public Board(Hero player, Hero ai) {
@@ -87,11 +86,13 @@ public class Board {
 		}
 	}
 
-	public void drawUnit(Unit unit, int row, int col) {
+	public boolean drawUnit(Unit unit, int row, int col) {
 		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS))
-			return;
+			return false;
 
-		units.add(unit);
+		if (board[row][col] != null)
+			return false;
+
 		board[row][col] = unit;
 
 		setCursorTo(row, col, 0, Console.alignCenter(CELL_COLS, unit.icon));
@@ -100,6 +101,7 @@ public class Board {
 		Console.print(unit.getCount());
 
 		Console.resetStyles();
+		return true;
 	}
 
 	/**
