@@ -12,7 +12,7 @@ public class IO {
 	static Scanner sc = new Scanner(System.in);
 
 	/**
-	 * Scans n comma separated objects given by the number of converter functions
+	 * Scans n space separated objects given by the number of converter functions
 	 * @param text Text to place before aksing for input
 	 * @param converters 
 	 * Each function specifies how to convert the n-th scanned element to the desired type.
@@ -26,7 +26,7 @@ public class IO {
 		int amt = converters.length;
 
 		Console.clearLine();
-		Console.print(String.format("%s: ", text));
+		Console.print("%s: ", text);
 		while(true) {
 			try {
 				String current = sc.nextLine();
@@ -48,7 +48,7 @@ public class IO {
 				Console.moveCursor(Console.MoveDirection.UP, 1);
 				Console.clearLine();
 				Console.resetStyles();
-				Console.print(String.format("Hibás bemenet! %s: ", text));
+				Console.print("%s %s: ", e.getMessage(), text);
 			}
 			res.clear();
 		}

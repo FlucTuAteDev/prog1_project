@@ -7,7 +7,7 @@ public class Converters {
 		return x -> {
 			int parsed = Integer.parseInt(x);
 			if (!Maths.inRange(parsed, min, max))
-				throw new Exception();
+				throw new IndexOutOfBoundsException();
 
 			return parsed;
 		};
