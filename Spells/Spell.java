@@ -1,20 +1,34 @@
 package Spells;
 
+import Hero.Hero;
+
 public abstract class Spell {
-	private String name;
-	private int price;
-	private int manna;
+	public final String name;
+	public final int price;
+	public final int manna;
+	public final int multiplier;
+	public final Hero hero;
+
 	private boolean active = false;
 
-	public Spell(String name, int price, int manna) {
+	public Spell(String name, int price, int manna, int multiplier, Hero hero) {
 		this.name = name;
 		this.price = price;
 		this.manna = manna;
+		this.multiplier = multiplier;
+		this.hero = hero;
 	}
 
-	public String getName() { return this.name; }
-	public int getPrice() { return this.price; }
-	public int getManna() { return this.manna; }
-	public boolean isActive() { return this.active; }
-	public void setActive() { this.active = true; }
+	public boolean isActive() {
+		return this.active;
+	}
+	public void setActive() {
+		this.active = true;
+	}
+
+	public double getValue() {
+		return multiplier * hero.getSkill("magic").getValue();
+	}
+
+	public abstract void cast();
 }

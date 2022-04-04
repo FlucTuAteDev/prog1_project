@@ -6,6 +6,7 @@ import java.util.Random;
 
 import Board.Tile;
 import Hero.Hero;
+import Spells.Spell;
 
 public abstract class Unit implements Comparable<Unit> {
 	private int count;
@@ -52,21 +53,43 @@ public abstract class Unit implements Comparable<Unit> {
 		other.takeDamage(other);
 	}
 
+	public void heal(double amt) {
+		this.health += (int)Math.round(amt);
+		// TODO: max hp
+		this.count = (int)Math.ceil(this.health / this.baseHealth);
+	}
+
+	public void takeDamage(double amt) {
+		int health = this.health - (int)Math.round(amt);
+		if (health < 0) {
+			this.health = 0;
+			this.count = 0;
+		}
+
+		this.health = health;
+		this.count = (int)Math.ceil(this.health / this.baseHealth);
+	}
+
 	public void takeDamage(Unit other) {
 		double attack = other.hero.getSkill("attack").getValue();
 		double defense = this.hero.getSkill("defense").getValue();
 		double luck = other.hero.getSkill("luck").getValue();
 
-		double result = other.getDamage();
-		result *= attack + 1;
-		result *= defense;
+		double damage = other.getDamage();
+		damage *= attack;
+		damage *= defense;
 
 		boolean crit = random.nextInt(0, (int) (1 / luck + 1)) == 0;
 		if (crit)
-			result *= 2;
+			damage *= 2;
 
-		this.health -= result;
-		this.count = (int)Math.ceil(this.health / this.baseHealth);
+		takeDamage(damage);
+	}
+
+	public void takeDamage(Hero hero) {
+		double damage = hero.getSkill("attack").getValue();
+
+		takeDamage(damage);
 	}
 
 	public List<Unit> attackableUnits() {

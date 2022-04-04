@@ -1,4 +1,4 @@
-package Menu;
+package Menu.Items;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
@@ -6,12 +6,12 @@ import Utils.Colors;
 import Utils.RGB;
 
 public class MenuItem {
-	String text;
-	RGB background;
-	RGB foreground;
-	Runnable action;
-	Supplier<?>[] textArgs;
-	boolean redrawSelf;
+	public final RGB foreground;
+	public final RGB background;
+	public final Runnable action;
+	public final boolean redrawSelf;
+	public final String text;
+	public final Supplier<?>[] textArgs;
 
 	public MenuItem(RGB foreground, RGB background, Runnable action, boolean redrawSelf, String text, Supplier<?>... textArgs) {
 		this.text = text;
@@ -32,10 +32,5 @@ public class MenuItem {
 
 	public Object[] evaluateArgs() {
 		return Arrays.stream(this.textArgs).map(x -> x.get()).toArray();
-	}
-
-	public MenuItem setRedraw(boolean value) {
-		this.redrawSelf = value;
-		return this;
 	}
 }

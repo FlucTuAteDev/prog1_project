@@ -10,6 +10,8 @@ import Board.Tile;
 import Hero.Hero;
 import Hero.Skill;
 import Menu.*;
+import Menu.Items.HeaderItem;
+import Menu.Items.MenuItem;
 import Spells.Spell;
 import Units.*;
 import Utils.*;
@@ -17,21 +19,24 @@ import Utils.Functions.Converters;
 
 public class Game {
 	private int money = 0;
-	private Hero player = new Hero(Colors.BLUE);
-	private Hero ai = new Hero(Colors.GREEN); // TODO: AI
 	private List<Unit> units = new ArrayList<>();
-
-	private Board board = new Board(player, ai);
 	private static final int INPUT_HEIGHT = Board.BOARD_HEIGHT + 1;
+	
+	public static final Hero player = new Hero(Colors.BLUE);
+	public static final Hero ai = new Hero(Colors.GREEN); // TODO: AI
+	public static final Board board = new Board(player, ai);
 
 	public Game() {
-		units.add(new Farmer(player));
-		units.add(new Farmer(ai));
-		units.add(new Archer(player));
-		units.add(new Archer(ai));
-		units.add(new Griff(player));
-		units.add(new Griff(ai));
+		player.addUnit(new Farmer(player));
+		player.addUnit(new Archer(player));
+		player.addUnit(new Griff(player));
 
+		ai.addUnit(new Farmer(ai));
+		ai.addUnit(new Archer(ai));
+		ai.addUnit(new Griff(ai));
+
+		units.addAll(player.getUnits());
+		units.addAll(ai.getUnits());
 		Collections.sort(units);
 	}
 
@@ -120,7 +125,7 @@ public class Game {
 			Spell spell = s.getValue();
 			spellMenu.addItem(new MenuItem(
 					() -> {
-						int spellPrice = spell.getPrice();
+						int spellPrice = spell.price;
 						if (spell.isActive() || money - spellPrice < 0)
 							return;
 
@@ -128,7 +133,7 @@ public class Game {
 						money -= spellPrice;
 					},
 					true,
-					String.format("%-15s (💲: %3d, 💪: %2d)", spell.getName(), spell.getPrice(), spell.getManna())
+					String.format("%-15s (💲: %3d, 💪: %2d)", spell.name, spell.price, spell.manna)
 							+ "%s",
 					() -> spell.isActive() ? '✅' : '❌'));
 		}
@@ -145,7 +150,7 @@ public class Game {
 		unitsMenu.addHeader(new HeaderItem(Colors.GRAY, "🙌: Kezdeményezés"));
 
 		// items
-		for (Unit unit : player.getUnitsFrom(units)) {
+		for (Unit unit : player.getUnits()) {
 			unitsMenu.addItem(new MenuItem(
 					() -> {
 						int maxAmount = money / unit.price;
@@ -176,7 +181,7 @@ public class Game {
 	public void placeUnits() {
 		board.drawBoard();
 		// Asks the user where to draw each unit
-		for (Unit unit : player.getUnitsFrom(units)) {
+		for (Unit unit : player.getUnits()) {
 			// DEBUG ONLY COMMENT
 			// if (unit.getCount().get() == 0) continue;
 
@@ -184,18 +189,18 @@ public class Game {
 			Console.clearLine();
 			Console.println("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount());
 
-			Tile tile = board.scanPosition(0, 2, 0, Board.BOARD_ROWS);
+			Tile tile = IO.scanTile(0, Board.ROWS, 0, Board.COLS);
 
 			board.drawUnit(unit, tile.row, tile.col);
 		}
 
 		Random rand = new Random();
-		for (Unit unit : ai.getUnitsFrom(units)) {
+		for (Unit unit : ai.getUnits()) {
 			int row, col;
 			unit.setCount(50);
 			do {
-				row = rand.nextInt(Board.BOARD_ROWS);
-				col = rand.nextInt(Board.BOARD_COLS - 2, Board.BOARD_COLS);
+				row = rand.nextInt(Board.ROWS);
+				col = rand.nextInt(Board.COLS - 2, Board.COLS);
 			} while (!board.drawUnit(unit, row, col));
 		}
 	}
@@ -204,7 +209,9 @@ public class Game {
 		Console.setCursorPosition(INPUT_HEIGHT, 0);
 		Console.clearBelow();
 		Menu actionMenu = new BasicMenu("Lépés");
-		Menu attackableMenu = new BasicMenu("Megtámadható egységek");
+		Menu unitAttackableMenu = new BasicMenu("Megtámadható egységek");
+		Menu heroAttackableMenu = new BasicMenu("Megtámadható egységek");
+		Menu spellMenu = new BasicMenu("Választható spellek");
 
 		while (true) {
 			for (Unit unit : this.units) {
@@ -216,35 +223,61 @@ public class Game {
 				Console.println("%s (%d)", unit.icon, unit.getCount());
 				Console.resetStyles();
 
-				List<Unit> attackableUnits = unit.attackableUnits();
-				if (attackableUnits.size() != 0) {
-					for (Unit attackableUnit : unit.attackableUnits()) {
-						attackableMenu.addItem(new MenuItem(
-								Colors.textFromBg(attackableUnit.hero.COLOR),
-								attackableUnit.hero.COLOR,
-								() -> {
-									unit.attack(attackableUnit);
-									board.redrawUnit(attackableUnit);
-								},
-								false,
-								"%s", () -> attackableUnit.icon));
-					}
-
-					attackableMenu.addItem(new MenuItem(
-							Colors.RED,
+				// List units that the current unit can attack
+				for (Unit attackableUnit : unit.attackableUnits()) {
+					unitAttackableMenu.addItem(new MenuItem(
+							Colors.textFromBg(attackableUnit.hero.COLOR),
+							attackableUnit.hero.COLOR,
 							() -> {
-								actionMenu.display(INPUT_HEIGHT + 1);
-							}, false, "Vissza"));
-
-					actionMenu.addItem(new MenuItem(() -> {
-						attackableMenu.display(INPUT_HEIGHT + 1);
-					}, false, "Egység -> Támadás"));
+								unit.attack(attackableUnit);
+								board.redrawUnit(attackableUnit);
+							},
+							false,
+							"%s", () -> attackableUnit.icon));
+				}
+				unitAttackableMenu.addItem(new MenuItem(
+						Colors.RED,
+						() -> {
+							Console.setCursorPosition(INPUT_HEIGHT + 1, 0);
+							Console.clearBelow();
+							actionMenu.display();
+						}, false, "Vissza"));
+				
+				// List of units that the current hero can attack
+				Hero enemy = unit.hero == player ? ai : player;
+				for (Unit attackableUnit : enemy.getUnits()) {
+					heroAttackableMenu.addItem(new MenuItem(
+						Colors.textFromBg(enemy.COLOR), 
+						enemy.COLOR, 
+						() -> {
+							unit.hero.attack(attackableUnit);
+							board.redrawUnit(attackableUnit);
+						}, false, String.format("%s", attackableUnit.icon)));
 				}
 
+				for (Spell spell : unit.hero.getSpellValues()) {
+					if (!spell.isActive()) continue;
+
+					spellMenu.addItem(new MenuItem(
+						() -> {
+							Console.setCursorPosition(INPUT_HEIGHT + 1, 0);
+							Console.clearBelow();
+							spell.cast();
+						}, 
+						false, 
+						spell.name));
+				}
+						
+				actionMenu.addItem(new MenuItem(() -> {
+					Console.setCursorPosition(INPUT_HEIGHT + 1, 0);
+					Console.clearBelow();
+					unitAttackableMenu.display();
+				}, false, "Egység -> Támadás"));
+				
 				actionMenu.addItem(new MenuItem(() -> {
 					boolean validMove = false;
 					do {
-						Tile movePos = board.scanPosition();
+						Tile movePos = IO.scanTile();
 
 						validMove = board.moveUnit(unit, movePos.row, movePos.col);
 						if (!validMove) {
@@ -256,17 +289,23 @@ public class Game {
 						}
 					} while (!validMove);
 				}, false, "Egység -> Mozgás"));
+				actionMenu.addItem(new MenuItem(() -> {}, false, "Egység -> Várakozás"));
+				actionMenu.addItem(new MenuItem(() -> heroAttackableMenu.display(), false, "Hős -> Támadás"));
 				actionMenu.addItem(new MenuItem(() -> {
-				}, false, "Egység -> Várakozás"));
-				actionMenu.addItem(new MenuItem(() -> {
-				}, false, "Hős -> Támadás"));
-				actionMenu.addItem(new MenuItem(() -> {
+					Console.setCursorPosition(INPUT_HEIGHT + 1, 0);
+					Console.clearBelow();
+
+					spellMenu.display();
 				}, false, "Hős -> Varázslás"));
 
-				actionMenu.display(INPUT_HEIGHT + 1);
+				Console.setCursorPosition(INPUT_HEIGHT + 1, 0);
+				Console.clearBelow();
+				actionMenu.display();
 
 				actionMenu.clearItems();
-				attackableMenu.clearItems();
+				unitAttackableMenu.clearItems();
+				heroAttackableMenu.clearItems();
+				spellMenu.clearItems();
 			}
 
 			// End of round

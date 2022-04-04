@@ -1,6 +1,8 @@
 package Menu;
 import Base.Console;
 import Base.Console.*;
+import Menu.Items.HeaderItem;
+import Menu.Items.MenuItem;
 import Utils.IO;
 import Utils.Functions.*;
 
@@ -9,11 +11,8 @@ public class InitMenu extends Menu {
 		super(name);
 	}
 
-	@Override
-	public void display(int row) {
-		Console.setCursorPosition(row, 0);
-		Console.clearBelow();
-
+	public void display() {
+		Console.clearScreen();
 		// Menu header
 		Console.println("-".repeat(Console.WIDTH));
 
@@ -55,10 +54,6 @@ public class InitMenu extends Menu {
 		MenuItem selectedItem = this.items.get(selected);
 		selectedItem.action.run();
 		if (selectedItem.redrawSelf)
-			this.display(row);
-	}
-
-	public void display() {
-		display(0);
+			this.display();
 	}
 }

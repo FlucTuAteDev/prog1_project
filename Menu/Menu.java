@@ -3,6 +3,9 @@ package Menu;
 import java.util.ArrayList;
 import java.util.List;
 
+import Menu.Items.HeaderItem;
+import Menu.Items.MenuItem;
+
 public abstract class Menu {
 	protected List<MenuItem> items;
 	protected List<HeaderItem> headers;
@@ -33,7 +36,6 @@ public abstract class Menu {
 	 * @param s
 	 * @return Where to put the cursor
 	 */
-
-	public abstract void display(int row);
+	
 	public abstract void display();
 }

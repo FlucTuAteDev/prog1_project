@@ -1,6 +1,6 @@
 package Menu;
 import Base.Console;
-import Base.Console.*;
+import Menu.Items.MenuItem;
 import Utils.IO;
 import Utils.Functions.*;
 
@@ -11,47 +11,21 @@ public class BasicMenu extends Menu {
 	}
 	
 	@Override
-	public void display(int row) {
-		Console.setCursorPosition(row, 0);
-		Console.clearBelow();
-		Console.resetStyles();
-		// Console.clearScreen();
-
-		// Menu header
-		// Console.println("-".repeat(Console.WIDTH));
-
-		// Console.setCursorCol(alignCenter(this.name));
-		// Console.printlnAligned(Alignment.CENTER, Console.WIDTH, this.name);
+	public void display() {
 		Console.println(this.name);
 
-		// If there are no elements in the list the cursor would stay next to the menu's
-		// name
-		// if (headers.size() > 0)
-		// 	Console.moveCursor(MoveDirection.UP, 1);
-
-		// for (HeaderItem header : headers) {
-		// 	Console.setForeground(header.foreground);
-
-		// 	String formattedText = String.format(header.text, header.evaluateArgs());
-
-		// 	Console.setCursorCol(Console.WIDTH - formattedText.length());
-		// 	Console.println(formattedText);
-		// }
-
-		// Console.resetStyles();
-		// Console.println("-".repeat(Console.WIDTH));
-		
 		// Display items with indices
 		int i = 0;
 		for (var item : this.items) {
 			// Run the item's functions
 			String formattedText = String.format(item.text, item.evaluateArgs());
 
-			Console.print("\t");
+			Console.print("\t%d) ", i + 1);
 			Console.setBackground(item.background);
 			Console.setForeground(item.foreground);
-			Console.println("%d) %s", i + 1, formattedText);
+			Console.print(formattedText);
 			Console.resetStyles();
+			Console.println("");
 			i++;
 		}
 
@@ -61,10 +35,6 @@ public class BasicMenu extends Menu {
 		MenuItem selectedItem = this.items.get(selected);
 		selectedItem.action.run();
 		if (selectedItem.redrawSelf)
-			this.display(row);
-	}
-
-	public void display() {
-		display(0);
+			this.display();
 	}
 }

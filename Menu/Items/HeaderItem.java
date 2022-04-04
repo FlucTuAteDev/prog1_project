@@ -1,4 +1,4 @@
-package Menu;
+package Menu.Items;
 
 import java.util.Arrays;
 import java.util.function.Supplier;
@@ -7,15 +7,15 @@ import Utils.Colors;
 import Utils.RGB;
 
 public class HeaderItem {
-	String text;
-	RGB background;
-	RGB foreground;
-	Supplier<?>[] textArgs;
+	public final String text;
+	public final RGB background;
+	public final RGB foreground;
+	public final Supplier<?>[] textArgs;
 
 	public HeaderItem(RGB foreground, RGB background, String text, Supplier<?>... textArgs) {
-		this.text = text;
 		this.foreground = foreground;
 		this.background = background;
+		this.text = text;
 		this.textArgs = textArgs;
 	}
 

@@ -6,12 +6,12 @@ import Units.*;
 import Utils.*;
 
 public class Board {
-	public static final int BOARD_COLS = 12;
-	public static final int BOARD_ROWS = 10;
+	public static final int ROWS = 10;
 	public static final int CELL_ROWS = 2;
+	public static final int BOARD_HEIGHT = CELL_ROWS * ROWS;
+	public static final int COLS = 12;
 	public static final int CELL_COLS = CELL_ROWS * 2;
-	public static final int BOARD_WIDTH = CELL_COLS * BOARD_COLS;
-	public static final int BOARD_HEIGHT = CELL_ROWS * BOARD_ROWS;
+	public static final int BOARD_WIDTH = CELL_COLS * COLS;
 	public static final int BOARD_OFFSET = Console.WIDTH / 2 - BOARD_WIDTH / 2;
 
 	private final RGB lightBg = Colors.WHITE;
@@ -20,24 +20,24 @@ public class Board {
 	private final Hero player;
 	private final Hero ai;
 
-	private Tile[][] board = new Tile[BOARD_ROWS][BOARD_COLS];
+	private Tile[][] board = new Tile[ROWS][COLS];
 
 	public Board(Hero player, Hero ai) {
 		this.player = player;
 		this.ai = ai;
 
 		// Generate tiles
-		for (int i = 0; i < BOARD_ROWS; i++) {
-			for (int j = 0; j < BOARD_COLS; j++) {
+		for (int i = 0; i < ROWS; i++) {
+			for (int j = 0; j < COLS; j++) {
 				board[i][j] = new Tile(i, j);
 			}
 		}
 
 		// Add neighbours
-		for (int i = 0; i < BOARD_ROWS; i++) {
-			for (int j = 0; j < BOARD_COLS; j++) {
-				for (int k = Math.max(i - 1, 0); k <= Math.min(i + 1, BOARD_ROWS - 1); k++) {
-					for (int l = Math.max(j - 1, 0); l <= Math.min(j + 1, BOARD_COLS - 1); l++) {
+		for (int i = 0; i < ROWS; i++) {
+			for (int j = 0; j < COLS; j++) {
+				for (int k = Math.max(i - 1, 0); k <= Math.min(i + 1, ROWS - 1); k++) {
+					for (int l = Math.max(j - 1, 0); l <= Math.min(j + 1, COLS - 1); l++) {
 						board[i][j].addNeighbour(board[k][l]);
 					}	
 				}
@@ -47,8 +47,8 @@ public class Board {
 
 	public void drawBoard() {
 		Console.clearScreen();
-		for (int i = 0; i < BOARD_ROWS; i++) {
-			for (int j = 0; j < BOARD_COLS; j++) {
+		for (int i = 0; i < ROWS; i++) {
+			for (int j = 0; j < COLS; j++) {
 				clearCell(i, j);
 
 				if (board[i][j].hasUnit())
@@ -92,28 +92,28 @@ public class Board {
 	 * @param rMax exclusive
 	 * @return
 	 */
-	public Tile scanPosition(int cMin, int cMax, int rMin, int rMax) {
-		// User input can range from min + 1 to max (1 based index)
-		// Position is returned from min to max - 1 (0 based index)
-		char firstCol = (char) ('a' + cMin);
-		char lastCol = (char) ('a' + cMax - 1);
+	// public Tile scanPosition(int cMin, int cMax, int rMin, int rMax) {
+	// 	// User input can range from min + 1 to max (1 based index)
+	// 	// Position is returned from min to max - 1 (0 based index)
+	// 	char firstCol = (char) ('a' + cMin);
+	// 	char lastCol = (char) ('a' + cMax - 1);
 
-		return (Tile) IO.scanAndConvert(
-				String.format("Cella", firstCol, lastCol, rMin + 1, rMax),
-				(String in) -> {
-					char c = in.charAt(0);
-					int r = Integer.parseInt(in.substring(1));
+	// 	return (Tile) IO.scanAndConvert(
+	// 			String.format("Cella [%c%d - %c%d]", firstCol, rMin + 1, lastCol, rMax + 1),
+	// 			(String in) -> {
+	// 				char c = in.charAt(0);
+	// 				int r = Integer.parseInt(in.substring(1));
 
-					if (c < firstCol || c > lastCol || r < rMin + 1 || r > rMax)
-						throw new Exception("Hibás bemenet!");
+	// 				if (c < firstCol || c > lastCol || r < rMin + 1 || r > rMax)
+	// 					throw new Exception("Hibás bemenet!");
 
-					return board[r - 1][c - 'a'];
-				}).get(0);
-	}
+	// 				return board[r - 1][c - 'a'];
+	// 			}).get(0);
+	// }
 
-	public Tile scanPosition() {
-		return scanPosition(0, BOARD_COLS, 0, BOARD_ROWS);
-	}
+	// public Tile scanPosition() {
+	// 	return scanPosition(0, BOARD_COLS, 0, BOARD_ROWS);
+	// }
 
 	public void setColors(Unit unit) {
 		Hero hero = unit.hero;
@@ -138,12 +138,8 @@ public class Board {
 		return true;
 	}
 
-	public boolean canAttack(Unit attacker, Unit defender) {
-		int dist = Tile.distance(attacker.getTile(), defender.getTile());
-		if (dist == 1)
-			return true;
-
-		return false;
+	public Tile getTile(int row, int col) {
+		return board[row][col];
 	}
 
 	private void setCursorTo(int row, int col) {
@@ -158,7 +154,7 @@ public class Board {
 	}
 
 	private boolean isValidPos(int row, int col) {
-		if (!Maths.inRange(row, 0, BOARD_ROWS) || !Maths.inRange(col, 0, BOARD_COLS))
+		if (!Maths.inRange(row, 0, ROWS) || !Maths.inRange(col, 0, COLS))
 			return false;
 
 		if (board[row][col].hasUnit())
