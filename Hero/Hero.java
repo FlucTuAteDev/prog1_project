@@ -30,14 +30,15 @@ public class Hero {
 		skills.put("moral", new Skill("Morál", 1, 1));
 		skills.put("luck", new Skill("Szerencse", 1, .05));
 
-		spells.put("thunderbolt", new Thunderbolt(this));
 		spells.put("fireball", new Fireball(this));
 		spells.put("resurrect", new Resurrection(this));
+		spells.put("thunderbolt", new Thunderbolt(this));
 
 		this.COLOR = color;
 	}
 
 	public void attack(Unit unit) {
+		unit.takeDamage(this);
 	}
 
 	public Set<Entry<String, Skill>> getSkills() {
@@ -53,7 +54,6 @@ public class Hero {
 	public Set<Entry<String, Spell>> getSpells() {
 		return spells.entrySet();
 	}
-
 	public Collection<Spell> getSpellValues() {
 		return spells.values();
 	}

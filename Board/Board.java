@@ -8,11 +8,11 @@ import Utils.*;
 public class Board {
 	public static final int ROWS = 10;
 	public static final int CELL_ROWS = 2;
-	public static final int BOARD_HEIGHT = CELL_ROWS * ROWS;
+	public static final int HEIGHT = CELL_ROWS * ROWS;
 	public static final int COLS = 12;
 	public static final int CELL_COLS = CELL_ROWS * 2;
-	public static final int BOARD_WIDTH = CELL_COLS * COLS;
-	public static final int BOARD_OFFSET = Console.WIDTH / 2 - BOARD_WIDTH / 2;
+	public static final int WIDTH = CELL_COLS * COLS;
+	public static final int BOARD_OFFSET = Console.WIDTH / 2 - WIDTH / 2;
 
 	private final RGB lightBg = Colors.WHITE;
 	private final RGB darkBg = Colors.BLACK;

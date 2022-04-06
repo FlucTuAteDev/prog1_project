@@ -4,11 +4,12 @@ import Base.Console.*;
 import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
 import Utils.IO;
-import Utils.Functions.*;
+import View.View;
 
-public class InitMenu extends Menu {
-	public InitMenu(String name) {
-		super(name);
+public class InitMenu<T> extends Menu<T> {
+
+	public InitMenu(String name, View view) {
+		super(name, view);
 	}
 
 	public void display() {
@@ -40,7 +41,8 @@ public class InitMenu extends Menu {
 		int i = 0;
 		for (var item : this.items) {
 			// Run the item's functions
-			String formattedText = String.format(item.text, item.evaluateArgs());
+			String formattedText = String.format(item.format, item.evaluateArgs());
+			Console.setBackground(item.background);
 			Console.setForeground(item.foreground);
 			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%d - %s", i + 1, formattedText);
 			i++;
@@ -48,12 +50,12 @@ public class InitMenu extends Menu {
 		Console.resetStyles();
 		Console.println("");
 
-		int selected = (int) IO.scanAndConvert(String.format("Válasszon [%d - %d]", 1, this.items.size()),
-				Converters.convertInt(1, this.items.size() + 1)).get(0) - 1;
+		int selected = IO.scanInt("Válasszon", 1, this.items.size()) - 1;
 
-		MenuItem selectedItem = this.items.get(selected);
-		selectedItem.action.run();
-		if (selectedItem.redrawSelf)
-			this.display();
+		MenuItem<T> selectedItem = this.items.get(selected);
+		selectedItem.action.accept(selectedItem.value);
+
+		if (selectedItem.next != null)
+			selectedItem.next.display();
 	}
 }

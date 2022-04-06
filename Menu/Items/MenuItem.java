@@ -1,36 +1,42 @@
 package Menu.Items;
 import java.util.Arrays;
-import java.util.function.Supplier;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
-import Utils.Colors;
+import Menu.Menu;
 import Utils.RGB;
 
-public class MenuItem {
+public class MenuItem<T> {
+	public final T value;
+	public final Menu<?> next;
 	public final RGB foreground;
 	public final RGB background;
-	public final Runnable action;
-	public final boolean redrawSelf;
-	public final String text;
-	public final Supplier<?>[] textArgs;
+	public final Consumer<T> action;
+	public final String format;
+	public final Function<T, ?>[] args;
 
-	public MenuItem(RGB foreground, RGB background, Runnable action, boolean redrawSelf, String text, Supplier<?>... textArgs) {
-		this.text = text;
+	@SafeVarargs
+	public MenuItem(T value, Menu<?> next, RGB foreground, RGB background, Consumer<T> action, String format, Function<T, ?>... args) {
+		this.value = value;
+		this.next = next;
 		this.background = background;
 		this.foreground = foreground;
-		this.redrawSelf = redrawSelf;
 		this.action = action;
-		this.textArgs = textArgs;
+		this.format = format;
+		this.args = args;
 	}
 
-	public MenuItem(RGB foreground, Runnable action, boolean redrawSelf, String text, Supplier<?>... textArgs) {
-		this(foreground, Colors.DEFAULT_BG, action, redrawSelf, text, textArgs);
+	@SafeVarargs
+	public MenuItem(T value, Menu<?> next, RGB foreground, Consumer<T> action, String format, Function<T, ?>... args) {
+		this(value, next, foreground, null, action, format, args);
 	}
 
-	public MenuItem(Runnable action, boolean redrawSelf, String text, Supplier<?>... textArgs) {
-		this(Colors.DEFAULT_FG, Colors.DEFAULT_BG, action, redrawSelf, text, textArgs);
+	@SafeVarargs
+	public MenuItem(T value, Menu<?> next, Consumer<T> action, String format, Function<T, ?>... args) {
+		this(value, next, null, null, action, format, args);
 	}
 
 	public Object[] evaluateArgs() {
-		return Arrays.stream(this.textArgs).map(x -> x.get()).toArray();
+		return Arrays.stream(this.args).map(x -> x.apply(value).toString()).toArray();
 	}
 }

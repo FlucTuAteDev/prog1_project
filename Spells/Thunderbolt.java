@@ -15,17 +15,17 @@ public class Thunderbolt extends Spell {
 
 	@Override
 	public void cast() {
-		Menu menu = new BasicMenu("Támadható egységek: ");
+		Menu<Unit> menu = new BasicMenu<>("Támadható egységek: ", Game.menuView);
 		Hero enemy = this.hero == Game.player ? Game.ai : Game.player;
 		for (Unit unit : enemy.getUnits()) {
-			menu.addItem(new MenuItem(
+			menu.addItem(new MenuItem<>(unit, null,
 				Colors.textFromBg(enemy.COLOR), 
 				enemy.COLOR,
-				() -> {
-					double damage = this.hero.getSkill("magic").getValue() * this.multiplier;
-					unit.takeDamage(damage);
-					Game.board.redrawUnit(unit);
-				}, false, String.format("%s", unit.icon)));
+				v -> {
+					double damage = v.hero.getSkill("magic").getValue() * this.multiplier;
+					v.takeDamage(damage);
+					Game.board.redrawUnit(v);
+				}, "%s", v -> v.icon));
 		}
 
 		menu.display();

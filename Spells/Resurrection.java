@@ -14,16 +14,16 @@ public class Resurrection extends Spell {
 
 	@Override
 	public void cast() {
-		Menu menu = new BasicMenu("Feltámasztható egységek: ");
+		Menu<Unit> menu = new BasicMenu<>("Feltámasztható egységek: ", Game.menuView);
 		for (Unit unit : this.hero.getUnits()) {
-			menu.addItem(new MenuItem(
+			menu.addItem(new MenuItem<>(unit, null,
 				Colors.textFromBg(this.hero.COLOR), 
 				this.hero.COLOR,
-				() -> {
-					double heal = this.hero.getSkill("magic").getValue() * this.multiplier;
-					unit.heal(heal);
-					Game.board.redrawUnit(unit);
-				}, false, String.format("%s", unit.icon)));
+				v -> {
+					double heal = v.hero.getSkill("magic").getValue() * this.multiplier;
+					v.heal(heal);
+					Game.board.redrawUnit(v);
+				}, "%s", v -> v.icon));
 		}
 
 		menu.display();

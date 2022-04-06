@@ -5,19 +5,23 @@ import java.util.List;
 
 import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
+import View.View;
 
-public abstract class Menu {
-	protected List<MenuItem> items;
+public abstract class Menu<T> {
+	protected List<MenuItem<T>> items;
 	protected List<HeaderItem> headers;
 	protected String name;
+	protected View view;
 
-	public Menu(String name) {
-		this.name = name;
-		this.items = new ArrayList<MenuItem>();
+	public Menu(String name, View view) {
+		this.items = new ArrayList<MenuItem<T>>();
 		this.headers = new ArrayList<HeaderItem>();
+		
+		this.name = name;
+		this.view = view;
 	}
 
-	public void addItem(MenuItem item) {
+	public void addItem(MenuItem<T> item) {
 		items.add(item);
 	}
 
