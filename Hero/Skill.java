@@ -33,6 +33,6 @@ public class Skill {
 	}
 
 	public double getValue() {
-		return (Math.abs(skill) < 1 ? 1 : 0) + skill * multiplier;
+		return (Math.abs(multiplier) < 1 ? 1 : 0) + skill * multiplier;
 	}
 }

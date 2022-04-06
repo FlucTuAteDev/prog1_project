@@ -4,6 +4,7 @@ import Base.Console;
 import Hero.Hero;
 import Units.*;
 import Utils.*;
+import View.View;
 
 public class Board {
 	public static final int ROWS = 10;
@@ -13,6 +14,7 @@ public class Board {
 	public static final int CELL_COLS = CELL_ROWS * 2;
 	public static final int WIDTH = CELL_COLS * COLS;
 	public static final int BOARD_OFFSET = Console.WIDTH / 2 - WIDTH / 2;
+	public static final View view = new View(0, BOARD_OFFSET, WIDTH, HEIGHT);
 
 	private final RGB lightBg = Colors.WHITE;
 	private final RGB darkBg = Colors.BLACK;
@@ -29,7 +31,7 @@ public class Board {
 		// Generate tiles
 		for (int i = 0; i < ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
-				board[i][j] = new Tile(i, j);
+				board[i][j] = new Tile(i, j, view);
 			}
 		}
 
@@ -49,6 +51,7 @@ public class Board {
 		Console.clearScreen();
 		for (int i = 0; i < ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
+				board[i][j].draw();
 				clearCell(i, j);
 
 				if (board[i][j].hasUnit())
@@ -124,13 +127,14 @@ public class Board {
 
 	/**
 	 * Moves the unit to the given position
-	 * 
+	 * s
 	 * @return If the move was successful
 	 */
 	public boolean moveUnit(Unit unit, int row, int col) {
-		if (!isValidPos(row, col) )
+		Tile to = board[row][col];
+		if (!isValidPos(row, col) || !unit.canMoveTo(to))
 			return false;
-
+		
 		Tile tile = unit.getTile();
 		clearCell(tile.row, tile.col);
 		drawUnit(unit, row, col);

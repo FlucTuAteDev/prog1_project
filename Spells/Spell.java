@@ -31,4 +31,6 @@ public abstract class Spell {
 	}
 
 	public abstract void cast();
+
+	// public abstract void effect();
 }

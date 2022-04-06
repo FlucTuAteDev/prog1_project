@@ -4,14 +4,13 @@ import Base.Console;
 import Base.Game;
 import Board.Board;
 import Board.Tile;
-import Units.Unit;
 import Utils.Functions.ConverterFunction;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import java.util.function.Function;
 
 public class IO {
 	static Scanner sc = new Scanner(System.in);
@@ -70,7 +69,8 @@ public class IO {
 		return res;
 	}
 
-	public static Tile scanTile(int rMin, int rMax, int cMin, int cMax, boolean allowUnit) {
+	@SafeVarargs
+	public static Tile scanTile(int rMin, int rMax, int cMin, int cMax, Function<Tile, String>... filters) {
 		// User input can range from min + 1 to max (1 based index)
 		// Position is returned from min to max - 1 (0 based index)
 		char firstCol = (char) ('a' + cMin);
@@ -95,15 +95,19 @@ public class IO {
 						throw new Exception("A cella a határokon kívül esik!");
 
 					Tile tile = Game.board.getTile(row - 1, col - 'a');
-					if (!allowUnit && tile.hasUnit())
-						throw new Exception("A cellán már tartózkodik egység!");
+					for (var filter : filters) {
+						String curr = filter.apply(tile);
+						if (curr != null)
+							throw new Exception(curr);
+					}
 
 					return tile;
 				}).get(0);
 	}
 
-	public static Tile scanTile(boolean allowUnit) {
-		return scanTile(0, Board.ROWS, 0, Board.COLS, allowUnit);
+	@SafeVarargs
+	public static Tile scanTile(Function<Tile, String>... filters) {
+		return scanTile(0, Board.ROWS, 0, Board.COLS, filters);
 	}
 
 	public static int scanInt(String text, int min, int max) {

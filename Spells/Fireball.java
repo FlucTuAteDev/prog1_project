@@ -12,7 +12,7 @@ public class Fireball extends Spell {
 
 	@Override
 	public void cast() {
-		Tile tile = IO.scanTile(true);
+		Tile tile = IO.scanTile();
 
 		if (tile.hasUnit()) {
 			tile.getUnit().takeDamage(this.getValue());

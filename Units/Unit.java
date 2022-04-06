@@ -6,7 +6,6 @@ import java.util.Random;
 
 import Board.Tile;
 import Hero.Hero;
-import Spells.Spell;
 
 public abstract class Unit implements Comparable<Unit> {
 	private int count;
@@ -79,7 +78,7 @@ public abstract class Unit implements Comparable<Unit> {
 		damage *= attack;
 		damage *= defense;
 
-		boolean crit = random.nextInt(0, (int) (1 / luck + 1)) == 0;
+		boolean crit = random.nextInt(0, (int) (1 / luck)) == 0;
 		if (crit)
 			damage *= 2;
 
@@ -87,7 +86,7 @@ public abstract class Unit implements Comparable<Unit> {
 	}
 
 	public void takeDamage(Hero hero) {
-		double damage = hero.getSkill("attack").getValue();
+		double damage = hero.getSkill("attack").getSkill() * 10;
 
 		takeDamage(damage);
 	}

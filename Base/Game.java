@@ -156,7 +156,8 @@ public class Game {
 			Console.println("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount());
 
 
-			Tile tile = IO.scanTile(0, Board.ROWS, 0, 2, false);
+			Tile tile = IO.scanTile(0, Board.ROWS, 0, 2, 
+				x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null);
 			board.drawUnit(unit, tile.row, tile.col);
 		}
 
@@ -172,18 +173,16 @@ public class Game {
 	}
 
 	private void update() {
-		Console.setCursorPosition(INPUT_HEIGHT, 0);
-		Console.clearBelow();
-
 		Menu<Object> actionMenu = new BasicMenu<>("Lépés", menuView);
 		Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek", menuView);
 		Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek", menuView);
 		Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek", menuView);
 
+		belowView.clear();
 		while (true) {
 			for (Unit unit : this.units) {
 				belowView.clear();
-
+ 
 				Console.print("Most következik: ");
 				board.setColors(unit);
 				Console.println("%s (%d)", unit.icon, unit.getCount());
@@ -231,8 +230,10 @@ public class Game {
 
 				actionMenu.addItem(new MenuItem<>(null, null,
 					v -> {
-						Tile movePos = IO.scanTile(false);
-						board.moveUnit(unit, movePos.row, movePos.col);
+						IO.scanTile(
+							x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null,
+							x -> !board.moveUnit(unit, x.row, x.col) ? "Az egység nem tud a megadott cellára lépni!" : null
+						);
 				}, "Egység -> Mozgás"));
 				actionMenu.addItem(new MenuItem<>(null, null, v -> {}, "Egység -> Várakozás"));
 				actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
