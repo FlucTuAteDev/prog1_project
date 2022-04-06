@@ -1,7 +1,6 @@
 package Base;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
@@ -15,22 +14,36 @@ import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
 import Spells.Spell;
 import Units.*;
-import Utils.*;
+import View.IO;
 import View.View;
+import View.Colors.*;
 
 public class Game {
+	static int INPUT_HEIGHT = Board.HEIGHT + 1;
+	public static View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT);
+	public static View belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
+	public static View menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
+	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2, Console.HEIGHT - Board.HEIGHT);
+	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2, (Console.WIDTH - Board.WIDTH) / 2, Console.HEIGHT - Board.HEIGHT);
+	public static Hero player = new Hero("Játékos", Colors.BLUE, playerView);
+	public static Hero ai = new Hero("AI", Colors.GREEN, aiView); // TODO: AI
+	public static Board	board = new Board(player, ai);
+
 	private int money = 0;
 	private List<Unit> units = new ArrayList<>();
-	private static final int INPUT_HEIGHT = Board.HEIGHT + 1;
-	
-	public static final Hero player = new Hero(Colors.BLUE);
-	public static final Hero ai = new Hero(Colors.GREEN); // TODO: AI
-	public static final Board board = new Board(player, ai);
-	public static final View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT);
-	public static final View belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
-	public static final View menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
 
 	public Game() {
+		initView = new View(1, 1, Console.WIDTH, Console.HEIGHT);
+		belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
+		menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
+
+		playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
+		aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
+		
+		player = new Hero("Játékos", Colors.BLUE, playerView);
+		ai = new Hero("AI", Colors.GREEN, aiView); // TODO: AI
+		board = new Board(player, ai);
+
 		player.addUnit(new Farmer(player));
 		player.addUnit(new Archer(player));
 		player.addUnit(new Griff(player));
@@ -71,27 +84,28 @@ public class Game {
 		var mainMenuItems = List.of(
 			List.of("Tulajdonságpontok", skillMenu),
 			List.of("Varázslatok", spellMenu),
-			List.of("Egységek", unitMenu),
-			Arrays.asList("Befejezés", null)
+			List.of("Egységek", unitMenu)
 		);
 		for (var item : mainMenuItems) {
 			mainMenu.addItem(new MenuItem<Object>(item.get(0), (Menu<?>)item.get(1),
 				v -> {}, 
 				"%-20s", v -> v));
 		}
+		mainMenu.addItem(new MenuItem<Object>(null, null, Colors.RED,
+				v -> {}, 
+				"Befejezés"));
 
 		// Skills
 		skillMenu.addHeader(moneyHeader);
-		skillMenu.addHeader(new HeaderItem("💲(Ár): %s", () -> Skill.PRICE));
+		skillMenu.addHeader(new HeaderItem("💲(Ár): %s", player::getSkillPrice));
 		for (var s : player.getSkills()) {
 			Skill skill = s.getValue();
 
 			skillMenu.addItem(new MenuItem<Skill>(skill, skillMenu,
 				v -> {
-					if (Skill.PRICE > money || !v.addSkill(1))
+					int skillPrice = v.hero.getSkillPrice();
+					if (!this.takeMoney(skillPrice) || !v.addSkill(1))
 						return;
-
-					money -= Skill.PRICE;
 				}, "%-15s (%2s/%2s)", v -> v.name, v -> v.getSkill(), v -> Skill.MAX_SKILL));
 		}
 		skillMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
@@ -106,14 +120,13 @@ public class Game {
 			spellMenu.addItem(new MenuItem<>(spell, spellMenu,
 					v -> {
 						int spellPrice = v.price;
-						if (v.isActive() || money - spellPrice < 0)
+						if (v.isActive() || !this.takeMoney(spellPrice))
 							return;
 
 						v.setActive();
-						money -= spellPrice;
 					},
-					"%-15s (💲: %3s, 💪: %2s) %3s",
-					v -> v.name, v -> v.price, v -> v.manna, v -> v.isActive() ? '✅' : '❌'));
+					"%-15s (💲: %3s, 💪: %2s)%s",
+					v -> v.name, v -> v.price, v -> v.manna, v -> v.isActive() ? "✅" : "❌"));
 		}
 		spellMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
 
@@ -173,17 +186,20 @@ public class Game {
 	}
 
 	private void update() {
-		Menu<Object> actionMenu = new BasicMenu<>("Lépés", menuView);
-		Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek", menuView);
-		Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek", menuView);
-		Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek", menuView);
+		Menu<Object> actionMenu = new BasicMenu<>("Lehetőségek:", menuView);
+		Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
+		Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
+		Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek:", menuView);
 
-		belowView.clear();
+		int round = 1;
 		while (true) {
 			for (Unit unit : this.units) {
+				player.draw();
+				ai.draw();
+				Hero enemy = unit.hero == player ? ai : player;
+				
 				belowView.clear();
- 
-				Console.print("Most következik: ");
+				Console.print("%d. kör. Most következik: ", round);
 				board.setColors(unit);
 				Console.println("%s (%d)", unit.icon, unit.getCount());
 				Console.resetStyles();
@@ -202,7 +218,6 @@ public class Game {
 				unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
 				
 				// Hero attacks
-				Hero enemy = unit.hero == player ? ai : player;
 				for (Unit attackableUnit : enemy.getUnits()) {
 					heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
 						Colors.textFromBg(enemy.COLOR), 
@@ -248,8 +263,8 @@ public class Game {
 				heroAttackableMenu.clearItems();
 				spellMenu.clearItems();
 			}
-
 			// End of round
+			round++;
 		}
 	}
 
@@ -261,5 +276,12 @@ public class Game {
 		this.update();
 
 		Console.setCursorPosition(Console.HEIGHT, 0);
+	}
+
+	private boolean takeMoney(int amt) {
+		if (amt > this.money) return false;
+		
+		this.money -= amt;
+		return true;
 	}
 }

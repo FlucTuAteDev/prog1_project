@@ -2,21 +2,21 @@ package Base;
 
 import java.util.function.Consumer;
 
-import Utils.RGB;
+import View.Colors.RGB;
 
 public class Console {
 	public class ANSI {
-		static final String ESC = "\u001b";
+		public static final String ESC = "\u001b";
 		// static final String DEL = "\u007f";
-		static final String HOME = ESC + "[H";
-		static final String ERASE_SCREEN = ESC + "[2J";
-		static final String RESET_COLORS = ESC + "[0m";
-		static final String CURSOR_SAVE = ESC + " 7";
-		static final String CURSOR_RESTORE = ESC + " 8";
-		static final String CURSOR_REQUEST = ESC + "[6n";
-		static final String ERASE_LINE = ESC + "[2K";
-		static final String TEXT_BOLD = ESC + "[1m";
-		static final String TEXT_NORMAL = ESC + "[0m";
+		public static final String HOME = ESC + "[H";
+		public static final String ERASE_SCREEN = ESC + "[2J";
+		public static final String RESET_COLORS = ESC + "[0m";
+		public static final String CURSOR_SAVE = ESC + " 7";
+		public static final String CURSOR_RESTORE = ESC + " 8";
+		public static final String CURSOR_REQUEST = ESC + "[6n";
+		public static final String ERASE_LINE = ESC + "[2K";
+		public static final String TEXT_BOLD = ESC + "[1m";
+		public static final String TEXT_NORMAL = ESC + "[0m";
 	}
 
 	public static final int WIDTH = 120;
@@ -31,21 +31,22 @@ public class Console {
 
 	private static void printBase(Alignment alignment, int width, Consumer<String> printFn, String format, Object... args) {
 		String s = String.format(format, args);
+		String stripped = s.replaceAll("\u001B\\[[\\d;]*[^\\d;]", ""); // Strips ansi sequences
+		int spaceLen = width - stripped.length();
+		String pad = spaceLen % 2 == 0 ? "" : " ";
 		switch (alignment) {
 			case LEFT:
 				printFn.accept(s);
 				break;
 			case CENTER: {
-				String out = String.format(
-					"%-" + width + "s",
-					String.format(
-							"%" + (s.length() + (width - s.length()) / 2) + "s",
-							s));
+				String spaces = " ".repeat(spaceLen / 2);
+				String out = String.format("%s%s%s" + pad, spaces, s, spaces);
 				printFn.accept(out);
 			}
 				break;
 			case RIGHT: {
-				String out = String.format("%-" + (width - s.length()) + "s", s);
+				String spaces = " ".repeat((width - stripped.length()));
+				String out = String.format("%s%s", spaces, s);
 				printFn.accept(out);
 			}
 				break;
@@ -89,18 +90,6 @@ public class Console {
 		public String getChar() {
 			return dir;
 		}
-	}
-
-	public static int alignCenter(int width, String text) {
-		return (int) Math.floor(width / 2.0 - text.length() / 2.0);
-	}
-
-	public static String centerString(int width, String s) {
-		return String.format(
-				"%-" + width + "s",
-				String.format(
-						"%" + (s.length() + (width - s.length()) / 2) + "s",
-						s));
 	}
 
 	public static void setCursorCol(int col) {
@@ -151,14 +140,24 @@ public class Console {
 		if (color == null)
 			resetStyles();
 		else
-			print(ANSI.ESC + "[38;2;" + color.r + ";" + color.g + ";" + color.b + "m");
+			print(getForeground(color));
 	}
 
 	public static void setBackground(RGB color) {
 		if (color == null)
 			resetStyles();
 		else
-			print(ANSI.ESC + "[48;2;" + color.r + ";" + color.g + ";" + color.b + "m");
+			print(getBackground(color));
+	}
+
+	public static String getForeground(RGB color) {
+		if (color == null) return "";
+		return String.format("%s[38;2;%d;%d;%dm", ANSI.ESC, color.r, color.g, color.b);
+	}
+
+	public static String getBackground(RGB color) {
+		if (color == null) return "";
+		return String.format("%s[48;2;%d;%d;%dm", ANSI.ESC, color.r, color.g, color.b);
 	}
 
 	public static void setBold() {

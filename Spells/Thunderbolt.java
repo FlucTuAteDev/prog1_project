@@ -3,8 +3,7 @@ package Spells;
 import Base.Game;
 import Hero.Hero;
 import Units.Unit;
-import Utils.Colors;
-
+import View.Colors.Colors;
 import Menu.*;
 import Menu.Items.MenuItem;
 

@@ -1,4 +1,7 @@
-package Utils;
+package View.Colors;
+
+import Base.Console;
+import Base.Console.ANSI;
 
 public final class Colors {
 	public static final RGB WHITE = new RGB(255, 255, 255);
@@ -19,5 +22,17 @@ public final class Colors {
 	public static RGB textFromBg(RGB bg) {
 		double L = ((bg.r * 0.299) + (bg.g * 0.587) + (bg.b * 0.114)); // HUH?
 		return (L > 186) ? BLACK : WHITE;
+	}
+
+	public static String wrapWithColor(String str, RGB background, RGB foreground) {
+		return String.format("%s%s%s%s", 
+			Console.getBackground(background),
+			Console.getForeground(foreground), 
+			str, 
+			ANSI.RESET_COLORS);
+	}
+
+	public static String wrapWithColor(String str, RGB foreground) {
+		return wrapWithColor(str, null, foreground);
 	}
 }

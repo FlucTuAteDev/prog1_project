@@ -1,7 +1,7 @@
 package Menu;
 import Base.Console;
 import Menu.Items.MenuItem;
-import Utils.IO;
+import View.IO;
 import View.View;
 
 public class BasicMenu<T> extends Menu<T> {

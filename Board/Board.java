@@ -5,6 +5,8 @@ import Hero.Hero;
 import Units.*;
 import Utils.*;
 import View.View;
+import View.Colors.Colors;
+import View.Colors.RGB;
 
 public class Board {
 	public static final int ROWS = 10;
@@ -127,7 +129,7 @@ public class Board {
 
 	/**
 	 * Moves the unit to the given position
-	 * s
+	 * 
 	 * @return If the move was successful
 	 */
 	public boolean moveUnit(Unit unit, int row, int col) {

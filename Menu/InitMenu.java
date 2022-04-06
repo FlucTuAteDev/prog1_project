@@ -3,7 +3,7 @@ import Base.Console;
 import Base.Console.*;
 import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
-import Utils.IO;
+import View.IO;
 import View.View;
 
 public class InitMenu<T> extends Menu<T> {

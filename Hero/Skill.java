@@ -2,17 +2,18 @@ package Hero;
 
 public class Skill {
 	public static final int MAX_SKILL = 10;
-	public static int PRICE = 5;
 
 	public final String name;
 	public final double multiplier;
+	public final Hero hero;
 
 	private int skill;
 
-	public Skill(String name, int value, double multiplier) {
+	public Skill(String name, double multiplier, Hero hero) {
 		this.name = name;
-		this.skill = value;
+		this.skill = 1;
 		this.multiplier = multiplier;
+		this.hero = hero;
 	}
 
 	public int getSkill() {
@@ -28,7 +29,7 @@ public class Skill {
 			return false;
 
 		this.skill = res;
-		PRICE = (int) Math.ceil((double) PRICE * 1.1);
+		this.hero.incrementSkillPrice();
 		return true;
 	}
 

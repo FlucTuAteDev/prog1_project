@@ -46,10 +46,8 @@ public abstract class Unit implements Comparable<Unit> {
 	}
 
 	public void attack(Unit other) {
-		if (!Arrays.stream(tile.getNeighbours()).anyMatch(x -> x.equals(other.tile)))
-			return;
-		
-		other.takeDamage(other);
+		if (Arrays.stream(tile.getNeighbours()).anyMatch(x -> x.equals(other.tile)))
+			other.takeDamage(this);
 	}
 
 	public void heal(double amt) {
@@ -72,15 +70,10 @@ public abstract class Unit implements Comparable<Unit> {
 	public void takeDamage(Unit other) {
 		double attack = other.hero.getSkill("attack").getValue();
 		double defense = this.hero.getSkill("defense").getValue();
-		double luck = other.hero.getSkill("luck").getValue();
-
-		double damage = other.getDamage();
-		damage *= attack;
-		damage *= defense;
+		double luck = other.hero.getSkill("luck").getValue() - 1;
 
 		boolean crit = random.nextInt(0, (int) (1 / luck)) == 0;
-		if (crit)
-			damage *= 2;
+		double damage = other.getDamage() * attack * defense * (crit ? 2 : 1);
 
 		takeDamage(damage);
 	}
@@ -90,11 +83,6 @@ public abstract class Unit implements Comparable<Unit> {
 
 		takeDamage(damage);
 	}
-
-	public List<Unit> attackableUnits() {
-		return Arrays.stream(tile.getNeighbours()).filter(x -> x.hasUnit() && x.getUnit().hero != this.hero).map(x -> x.getUnit()).toList();
-	}
-
 	public int getDamage() {
 		if (this.minDamage == this.maxDamage) return this.minDamage;
 
@@ -104,7 +92,6 @@ public abstract class Unit implements Comparable<Unit> {
 	public int getCount() {
 		return this.count;
 	}
-
 	public void setCount(int count) {
 		if (count < 0)
 			this.count = 0;
@@ -117,13 +104,16 @@ public abstract class Unit implements Comparable<Unit> {
 	public Tile getTile() {
 		return this.tile;
 	}
-
 	public void setTile(Tile tile) {
 		this.tile = tile;
 	}
 
 	public int getHealth() {
 		return this.health;
+	}
+
+	public List<Unit> attackableUnits() {
+		return Arrays.stream(tile.getNeighbours()).filter(x -> x.hasUnit() && x.getUnit().hero != this.hero).map(x -> x.getUnit()).toList();
 	}
 
 	@Override

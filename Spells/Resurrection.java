@@ -5,7 +5,7 @@ import Hero.Hero;
 import Menu.*;
 import Menu.Items.MenuItem;
 import Units.Unit;
-import Utils.Colors;
+import View.Colors.Colors;
 
 public class Resurrection extends Spell {
 	public Resurrection(Hero hero) {

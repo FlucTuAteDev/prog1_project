@@ -1,4 +1,4 @@
-package Utils;
+package View.Colors;
 
 public class RGB {
 	public int r;

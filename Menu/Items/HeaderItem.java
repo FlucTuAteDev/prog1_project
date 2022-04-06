@@ -3,8 +3,8 @@ package Menu.Items;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
-import Utils.Colors;
-import Utils.RGB;
+import View.Colors.Colors;
+import View.Colors.RGB;
 
 public class HeaderItem {
 	public final String text;

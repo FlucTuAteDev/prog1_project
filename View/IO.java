@@ -1,10 +1,12 @@
-package Utils;
+package View;
 
 import Base.Console;
 import Base.Game;
 import Board.Board;
 import Board.Tile;
+import Utils.Maths;
 import Utils.Functions.ConverterFunction;
+import View.Colors.Colors;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,10 +60,10 @@ public class IO {
 
 				Console.clearLine(); // If there was an error message before
 				Console.print("%s", e.getMessage());
+				Console.resetStyles();
 
 				Console.moveCursor(Console.MoveDirection.UP, 1);
 				Console.clearLine();
-				Console.resetStyles();
 			}
 			res.clear();
 		}

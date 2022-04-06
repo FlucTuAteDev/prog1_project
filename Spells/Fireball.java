@@ -3,7 +3,7 @@ package Spells;
 import Base.Game;
 import Board.Tile;
 import Hero.Hero;
-import Utils.IO;
+import View.IO;
 
 public class Fireball extends Spell {
 	public Fireball(Hero hero) {

@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 import Menu.Menu;
-import Utils.RGB;
+import View.Colors.RGB;
 
 public class MenuItem<T> {
 	public final T value;
