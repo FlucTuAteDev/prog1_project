@@ -23,8 +23,9 @@ public class Game {
 	public static View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT);
 	public static View belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
 	public static View menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
-	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
-	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
+
+	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
+	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
 	public static Hero player = new Hero("Játékos", Colors.DARK_BLUE, playerView);
 	public static Hero ai = new Hero("AI", Colors.DARK_GREEN, aiView); // TODO: AI
 	public static Board	board = new Board(player, ai);
@@ -114,8 +115,9 @@ public class Game {
 
 						v.setActive();
 					},
-					"%-15s (💲: %3s, 💪: %2s)%s",
-					v -> v.name, v -> v.price, v -> v.manna, v -> v.isActive() ? "✅" : "❌"));
+					"%-15s (💲: %3s, 💪: %2s) %s",
+					v -> v.name, v -> v.price, v -> v.manna, v -> v.isActive() ? "✔" : "✖"));
+					
 		}
 		spellMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
 

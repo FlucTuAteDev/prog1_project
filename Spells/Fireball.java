@@ -1,6 +1,5 @@
 package Spells;
 
-import Base.Game;
 import Board.Tile;
 import Hero.Hero;
 import Units.Unit;

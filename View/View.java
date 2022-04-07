@@ -1,6 +1,8 @@
 package View;
 
 import Base.Console;
+import Base.Console.Alignment;
+import Base.Console.MoveDirection;
 
 public class View {
 	public final int top;
@@ -34,5 +36,23 @@ public class View {
 		}
 
 		home();
+	}
+
+	public void println(String format, Object... args) {
+		Console.print(format, args);
+		Console.setCursorCol(left);
+		Console.moveCursor(MoveDirection.DOWN, 1);
+	}
+
+	public void printlnAligned(Alignment alignment, int width, String format, Object... args) {
+		Console.printAligned(alignment, width, format, args);
+		Console.setCursorCol(left);
+		Console.moveCursor(MoveDirection.DOWN, 1);
+	}
+
+	public void printlnAligned(Alignment alignment, String format, Object... args) {
+		Console.printAligned(alignment, this.width, format, args);
+		Console.setCursorCol(left);
+		Console.moveCursor(MoveDirection.DOWN, 1);
 	}
 }

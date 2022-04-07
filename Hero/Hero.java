@@ -15,7 +15,6 @@ import Spells.Resurrection;
 import Spells.Spell;
 import Spells.Thunderbolt;
 import Units.*;
-import Utils.*;
 import View.Drawable;
 import View.View;
 import View.Colors.Colors;
@@ -91,7 +90,12 @@ public class Hero implements Drawable {
 	@Override
 	public void draw() {
 		view.clear();
-		Console.printAligned(Alignment.CENTER, view.width, Colors.wrapWithColor(" " + name + " ", this.COLOR, this.TEXT_COLOR)); 
+		view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(String.format(" %s ", name), this.COLOR, this.TEXT_COLOR));
+
+		for (Unit unit : units) {
+			view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(" %s %s(%d/%d) ", unit.hero.COLOR, unit.hero.TEXT_COLOR), unit.name, unit.icon, unit.getCount(), unit.getCount());
+		}
+		// view.println("", args);
 	}
 
 	// public Unit[] getUnitsFrom(Collection<Unit> units) {

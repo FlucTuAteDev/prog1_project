@@ -11,10 +11,6 @@ import Hero.Hero;
 import View.Drawable;
 
 public abstract class Unit implements Comparable<Unit>, Drawable {
-	private int count;
-	private Tile tile;
-	private int health;
-
 	public final String name;
 	public final Hero hero;
 	public final String icon;
@@ -25,8 +21,14 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public final int speed;
 	public final int initiative;
 
+	private int count;
+	private int maxCount;
+	private int health;
+	
+	private Tile tile;
+	
 	Random random = new Random();
-
+	
 	public Unit(String name, String icon, Hero hero, int price, int minDamage, int maxDamage, int baseHealth, int speed,
 			int initiative) {
 		this.name = name;
@@ -41,6 +43,7 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		this.initiative = initiative;
 
 		this.count = 0;
+		this.maxCount = 0;
 		this.health = 0;
 	}
 
@@ -54,12 +57,10 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	}
 
 	public void heal(double amt) {
-		this.health += (int)Math.round(amt);
-		// TODO: max hp
+		this.health = Math.min(this.health + (int)Math.round(amt), this.maxCount);
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
 		draw();
 	}
-
 	public void takeDamage(double amt) {
 		int health = this.health - (int)Math.round(amt);
 		if (health < 0) {
@@ -71,7 +72,6 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
 		draw();
 	}
-
 	public void takeDamage(Unit other) {
 		double attack = other.hero.getSkill("attack").getValue();
 		double defense = this.hero.getSkill("defense").getValue();
@@ -82,7 +82,6 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 
 		takeDamage(damage);
 	}
-
 	public void takeDamage(Hero hero) {
 		double damage = hero.getSkill("attack").getPoints() * 10;
 
@@ -97,13 +96,17 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public int getCount() {
 		return this.count;
 	}
-	public void setCount(int count) {
+	public int getMaxCount() {
+		return this.maxCount;
+	}
+	public void setMaxCount(int count) {
 		if (count < 0)
-			this.count = 0;
+			this.maxCount = 0;
 		else
-			this.count = count;
+			this.maxCount = count;
 
-		this.health = this.baseHealth * this.count;
+		this.health = this.baseHealth * this.maxCount;
+		this.count = this.maxCount;
 	}
 
 	public Tile getTile() {
@@ -127,7 +130,9 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	}
 
 	public List<Unit> attackableUnits() {
-		return Arrays.stream(tile.getNeighbours()).filter(x -> x.hasUnit() && x.getUnit().hero != this.hero).map(x -> x.getUnit()).toList();
+		return Arrays.stream(tile.getNeighbours())
+			.filter(x -> x.hasUnit() && x.getUnit().hero != this.hero)
+			.map(x -> x.getUnit()).toList();
 	}
 
 	@Override

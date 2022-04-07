@@ -22,35 +22,30 @@ public class Console {
 	public static final int WIDTH = 120;
 	public static final int HEIGHT = 30;
 
-	// public static void print(Object o) {
-	// System.out.print(o);
-	// }
 	public static enum Alignment {
 		LEFT, CENTER, RIGHT
 	};
 
 	private static void printBase(Alignment alignment, int width, Consumer<String> printFn, String format, Object... args) {
-		String s = String.format(format, args);
-		String stripped = s.replaceAll("\u001B\\[[\\d;]*[^\\d;]", ""); // Strips ansi sequences
+		String str = String.format(format, args);
+		String stripped = stripAnsi(str); // Strips ansi sequences
 		int spaceLen = width - stripped.length();
-		String pad = spaceLen % 2 == 0 ? "" : " ";
 		switch (alignment) {
 			case LEFT:
-				printFn.accept(s);
+				printFn.accept(str);
 				break;
 			case CENTER: {
 				String spaces = " ".repeat(spaceLen / 2);
-				String out = String.format("%s%s%s" + pad, spaces, s, spaces);
+				String pad = spaceLen % 2 == 0 ? "" : " ";
+				String out = String.format("%s%s%s" + pad, spaces, str, spaces);
 				printFn.accept(out);
 			}
 				break;
 			case RIGHT: {
 				String spaces = " ".repeat((width - stripped.length()));
-				String out = String.format("%s%s", spaces, s);
+				String out = String.format("%s%s", spaces, str);
 				printFn.accept(out);
 			}
-				break;
-			default:
 				break;
 		}
 	}
@@ -106,6 +101,10 @@ public class Console {
 		print(ANSI.ESC + "[" + amount + direction.getChar());
 	}
 
+	/**
+	 * Clearing
+	 */
+
 	public static void clearScreen() {
 		try {
 			if (System.getProperty("os.name").contains("Windows"))
@@ -150,6 +149,18 @@ public class Console {
 			print(getBackground(color));
 	}
 
+	public static void setBold() {
+		print(ANSI.TEXT_BOLD);
+	}
+
+	public static void setNormal() {
+		print(ANSI.TEXT_NORMAL);
+	}
+
+	/**
+	 * Strings
+	 */
+
 	public static String getForeground(RGB color) {
 		if (color == null) return "";
 		return String.format("%s[38;2;%d;%d;%dm", ANSI.ESC, color.r, color.g, color.b);
@@ -160,11 +171,7 @@ public class Console {
 		return String.format("%s[48;2;%d;%d;%dm", ANSI.ESC, color.r, color.g, color.b);
 	}
 
-	public static void setBold() {
-		print(ANSI.TEXT_BOLD);
-	}
-
-	public static void setNormal() {
-		print(ANSI.TEXT_NORMAL);
+	public static String stripAnsi(String str) {
+		return str.replaceAll("\u001B\\[[\\d;]*[^\\d;]", "");
 	}
 }

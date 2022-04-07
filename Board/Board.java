@@ -3,10 +3,7 @@ package Board;
 import Base.Console;
 import Hero.Hero;
 import Units.*;
-import Utils.*;
 import View.View;
-import View.Colors.Colors;
-import View.Colors.RGB;
 
 public class Board {
 	public static final int ROWS = 10;
