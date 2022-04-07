@@ -23,27 +23,16 @@ public class Game {
 	public static View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT);
 	public static View belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
 	public static View menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
-	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2, Console.HEIGHT - Board.HEIGHT);
-	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2, (Console.WIDTH - Board.WIDTH) / 2, Console.HEIGHT - Board.HEIGHT);
-	public static Hero player = new Hero("Játékos", Colors.BLUE, playerView);
-	public static Hero ai = new Hero("AI", Colors.GREEN, aiView); // TODO: AI
+	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
+	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
+	public static Hero player = new Hero("Játékos", Colors.DARK_BLUE, playerView);
+	public static Hero ai = new Hero("AI", Colors.DARK_GREEN, aiView); // TODO: AI
 	public static Board	board = new Board(player, ai);
 
 	private int money = 0;
 	private List<Unit> units = new ArrayList<>();
 
 	public Game() {
-		initView = new View(1, 1, Console.WIDTH, Console.HEIGHT);
-		belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
-		menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
-
-		playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
-		aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 1, (Console.WIDTH - Board.WIDTH) / 2, Board.HEIGHT);
-		
-		player = new Hero("Játékos", Colors.BLUE, playerView);
-		ai = new Hero("AI", Colors.GREEN, aiView); // TODO: AI
-		board = new Board(player, ai);
-
 		player.addUnit(new Farmer(player));
 		player.addUnit(new Archer(player));
 		player.addUnit(new Griff(player));
@@ -104,9 +93,9 @@ public class Game {
 			skillMenu.addItem(new MenuItem<Skill>(skill, skillMenu,
 				v -> {
 					int skillPrice = v.hero.getSkillPrice();
-					if (!this.takeMoney(skillPrice) || !v.addSkill(1))
+					if (!this.takeMoney(skillPrice) || !v.addPoints(1))
 						return;
-				}, "%-15s (%2s/%2s)", v -> v.name, v -> v.getSkill(), v -> Skill.MAX_SKILL));
+				}, "%-15s (%2s/%2s)", v -> v.name, v -> v.getPoints(), v -> Skill.MAX_SKILL));
 		}
 		skillMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
 
@@ -168,10 +157,10 @@ public class Game {
 			belowView.clear();
 			Console.println("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount());
 
-
 			Tile tile = IO.scanTile(0, Board.ROWS, 0, 2, 
 				x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null);
-			board.drawUnit(unit, tile.row, tile.col);
+
+			unit.setTile(tile);
 		}
 
 		Random rand = new Random();
@@ -181,7 +170,8 @@ public class Game {
 			do {
 				row = rand.nextInt(Board.ROWS);
 				col = rand.nextInt(Board.COLS - 2, Board.COLS);
-			} while (!board.drawUnit(unit, row, col));
+			} while (board.getTile(row, col).hasUnit());
+			unit.setTile(board.getTile(row, col));
 		}
 	}
 
@@ -211,7 +201,6 @@ public class Game {
 							attackableUnit.hero.COLOR,
 							v -> {
 								v.attack(attackableUnit);
-								board.redrawUnit(attackableUnit);
 							},
 							"%s", v -> v.icon));
 				}
@@ -224,7 +213,6 @@ public class Game {
 						enemy.COLOR, 
 						v -> {
 							v.hero.attack(attackableUnit);
-							board.redrawUnit(attackableUnit);
 						}, "%s", v -> v.icon));
 				}
 				heroAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
@@ -247,7 +235,7 @@ public class Game {
 					v -> {
 						IO.scanTile(
 							x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null,
-							x -> !board.moveUnit(unit, x.row, x.col) ? "Az egység nem tud a megadott cellára lépni!" : null
+							x -> !unit.move(x) ? "Az egység nem tud a megadott cellára lépni!" : null
 						);
 				}, "Egység -> Mozgás"));
 				actionMenu.addItem(new MenuItem<>(null, null, v -> {}, "Egység -> Várakozás"));

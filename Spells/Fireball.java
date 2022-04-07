@@ -3,6 +3,7 @@ package Spells;
 import Base.Game;
 import Board.Tile;
 import Hero.Hero;
+import Units.Unit;
 import View.IO;
 
 public class Fireball extends Spell {
@@ -15,15 +16,17 @@ public class Fireball extends Spell {
 		Tile tile = IO.scanTile();
 
 		if (tile.hasUnit()) {
-			tile.getUnit().takeDamage(this.getValue());
-			Game.board.redrawUnit(tile.getUnit());
+			Unit unit = tile.getUnit();
+			unit.takeDamage(this.getValue());
+			unit.draw();
 		}
 
 		for (Tile neighbour : tile.getNeighbours()) {
 			if (!neighbour.hasUnit()) continue;
 
-			neighbour.getUnit().takeDamage(this.getValue());
-			Game.board.redrawUnit(neighbour.getUnit());
+			Unit unit = neighbour.getUnit();
+			unit.takeDamage(this.getValue());
+			unit.draw();
 		}
 	}
 }

@@ -4,10 +4,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import Base.Console;
+import Base.Console.Alignment;
 import Board.Tile;
 import Hero.Hero;
+import View.Drawable;
 
-public abstract class Unit implements Comparable<Unit> {
+public abstract class Unit implements Comparable<Unit>, Drawable {
 	private int count;
 	private Tile tile;
 	private int health;
@@ -54,6 +57,7 @@ public abstract class Unit implements Comparable<Unit> {
 		this.health += (int)Math.round(amt);
 		// TODO: max hp
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
+		draw();
 	}
 
 	public void takeDamage(double amt) {
@@ -65,6 +69,7 @@ public abstract class Unit implements Comparable<Unit> {
 
 		this.health = health;
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
+		draw();
 	}
 
 	public void takeDamage(Unit other) {
@@ -79,7 +84,7 @@ public abstract class Unit implements Comparable<Unit> {
 	}
 
 	public void takeDamage(Hero hero) {
-		double damage = hero.getSkill("attack").getSkill() * 10;
+		double damage = hero.getSkill("attack").getPoints() * 10;
 
 		takeDamage(damage);
 	}
@@ -105,7 +110,16 @@ public abstract class Unit implements Comparable<Unit> {
 		return this.tile;
 	}
 	public void setTile(Tile tile) {
+		if (tile == this.tile) return;
+
+		Tile previous = this.tile;
 		this.tile = tile;
+
+		if (previous != null) 
+			previous.setUnit(null);
+
+		if (tile != null)
+			tile.setUnit(this);
 	}
 
 	public int getHealth() {
@@ -120,5 +134,27 @@ public abstract class Unit implements Comparable<Unit> {
 	public int compareTo(Unit other) {
 		// Descending order
 		return other.initiative - this.initiative;
+	}
+
+	@Override
+	public void draw() {
+		if (this.tile == null) return;
+
+		this.tile.setCursor();
+		Console.setBackground(this.hero.COLOR);
+		Console.setForeground(this.hero.TEXT_COLOR);
+		Console.printAligned(Alignment.CENTER, Tile.COLS, "%s", this.icon);
+		this.tile.setCursor(1, 0);
+		Console.printAligned(Alignment.CENTER, Tile.COLS, "%d", this.getCount());
+		Console.resetStyles();
+	}
+
+	public boolean move(Tile tile) {
+		if (tile.hasUnit() || !canMoveTo(tile))
+			return false;
+
+		this.tile.setUnit(null);
+		setTile(tile);
+		return true;
 	}
 }

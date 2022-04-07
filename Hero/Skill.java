@@ -7,33 +7,33 @@ public class Skill {
 	public final double multiplier;
 	public final Hero hero;
 
-	private int skill;
+	private int points;
 
 	public Skill(String name, double multiplier, Hero hero) {
 		this.name = name;
-		this.skill = 1;
+		this.points = 1;
 		this.multiplier = multiplier;
 		this.hero = hero;
 	}
 
-	public int getSkill() {
-		return skill;
+	public int getPoints() {
+		return points;
 	}
 
-	public boolean addSkill(int amt) {
+	public boolean addPoints(int amt) {
 		if (amt < 1)
 			return false;
 
-		int res = this.skill + amt;
+		int res = this.points + amt;
 		if (res > MAX_SKILL)
 			return false;
 
-		this.skill = res;
+		this.points = res;
 		this.hero.incrementSkillPrice();
 		return true;
 	}
 
 	public double getValue() {
-		return (Math.abs(multiplier) < 1 ? 1 : 0) + skill * multiplier;
+		return (Math.abs(multiplier) < 1 ? 1 : 0) + points * multiplier;
 	}
 }

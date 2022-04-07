@@ -91,7 +91,7 @@ public class Hero implements Drawable {
 	@Override
 	public void draw() {
 		view.clear();
-		Console.printAligned(Alignment.CENTER, view.width, Colors.wrapWithColor(name, this.COLOR)); 
+		Console.printAligned(Alignment.CENTER, view.width, Colors.wrapWithColor(" " + name + " ", this.COLOR, this.TEXT_COLOR)); 
 	}
 
 	// public Unit[] getUnitsFrom(Collection<Unit> units) {

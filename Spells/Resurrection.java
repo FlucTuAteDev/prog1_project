@@ -22,7 +22,7 @@ public class Resurrection extends Spell {
 				v -> {
 					double heal = v.hero.getSkill("magic").getValue() * this.multiplier;
 					v.heal(heal);
-					Game.board.redrawUnit(v);
+					v.draw();
 				}, "%s", v -> v.icon));
 		}
 

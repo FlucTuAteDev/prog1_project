@@ -7,11 +7,16 @@ import java.util.Set;
 import Base.Console;
 import Base.Console.Alignment;
 import Units.Unit;
+import View.Colors.*;
 import View.View;
 
 public class Tile {
 	public static final int ROWS = 2;
 	public static final int COLS = 2 * ROWS;
+	public static final RGB lightBg = Colors.WHITE;
+	public static final RGB darkBg = Colors.BLACK;
+	public static final RGB lightText = Colors.LIGHT_GRAY;
+	public static final RGB darkText = Colors.GRAY;
 	public final int row;
 	public final int col;
 	public final View view;
@@ -46,24 +51,45 @@ public class Tile {
 	}
 
 	public void setUnit(Unit unit) {
-		if (unit == null) {
-			if (this.unit != null)
-				this.unit.setTile(null);
-		}
-		else
-			unit.setTile(this);
-
+		if (unit == this.unit) return;
+		
+		Unit old = this.unit;
 		this.unit = unit;
+
+		if (old != null)
+			old.setTile(null);
+		
+		if (unit != null)
+			unit.setTile(this);
+		
+		draw();
+	}
+
+	public void setCursor(int rOffset, int cOffset) {
+		view.setCursorPosItion(row * ROWS + 1 + rOffset, col * COLS + 1 + cOffset);
+	}
+	public void setCursor() {
+		setCursor(0, 0);
 	}
 
 	public void draw() {
+		setCursor();
 		if (this.hasUnit()) {
-			Console.printAligned(Alignment.CENTER, COLS, "%s", this.unit.icon);
-			Console.printAligned(Alignment.CENTER, COLS, "%d", this.unit.getCount());
+			this.unit.draw();
+			return;
 		}
-	}
 
-	// public void draw()
+		Console.setBackground(bgColor());
+		Console.setForeground(fgColor());
+
+		Console.printAligned(Alignment.CENTER, COLS, "%c%d", 'a' + col, row + 1);
+		String spaces =  " ".repeat(COLS);
+		for (int i = 1; i < ROWS; i++) {
+			setCursor(i, 0);
+			Console.print(spaces);
+		}
+		Console.resetStyles();
+	}
 
 	public static int distance(Tile a, Tile b) {
 		return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
@@ -86,5 +112,15 @@ public class Tile {
 	@Override
 	public int hashCode() {
 		return Objects.hash(row, col);
+	}
+
+	private boolean isLight() {
+		return (row + col) % 2 == 0;
+	}
+	private RGB bgColor() {
+		return isLight() ? lightBg : darkBg;
+	}
+	private RGB fgColor() {
+		return isLight() ? lightText : darkText;
 	}
 }

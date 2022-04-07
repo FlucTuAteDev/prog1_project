@@ -23,7 +23,7 @@ public class Thunderbolt extends Spell {
 				v -> {
 					double damage = v.hero.getSkill("magic").getValue() * this.multiplier;
 					v.takeDamage(damage);
-					Game.board.redrawUnit(v);
+					v.draw();
 				}, "%s", v -> v.icon));
 		}
 
