@@ -23,13 +23,14 @@ import View.Colors.RGB;
 public class Hero implements Drawable {
 	public final RGB COLOR;
 	public final RGB TEXT_COLOR;
+	public final View view;
+	public final String name;
 
 	private Map<String, Skill> skills = new LinkedHashMap<>();
 	private Map<String, Spell> spells = new LinkedHashMap<>();
 	private List<Unit> units = new ArrayList<>();
 	private int skillPrice = 5;
-	public final View view;
-	public final String name;
+	private int usedManna = 0;
 
 	public Hero(String name, RGB color, View view) {
 		this.name = name;
@@ -87,13 +88,27 @@ public class Hero implements Drawable {
 		return this.skillPrice;
 	}
 
+	public int getManna() {
+		return (int)getSkill("intelligence").getValue() - usedManna;
+	}
+
+	public boolean useManna(int amt) {
+		int res = getManna() - amt;
+		if (res < 0) return false;
+
+		usedManna += amt;
+		draw();
+		return true;
+	}
+
 	@Override
 	public void draw() {
 		view.clear();
-		view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(String.format(" %s ", name), this.COLOR, this.TEXT_COLOR));
+		view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(" %s - %d manna ", this.COLOR, this.TEXT_COLOR), this.name, this.getManna());
+		view.println("");
 
 		for (Unit unit : units) {
-			view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(" %s %s(%d/%d) ", unit.hero.COLOR, unit.hero.TEXT_COLOR), unit.name, unit.icon, unit.getCount(), unit.getCount());
+			view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(" %s %s(%d/%d) ", unit.hero.COLOR, unit.hero.TEXT_COLOR), unit.name, unit.icon, unit.getCount(), unit.getMaxCount());
 		}
 		// view.println("", args);
 	}

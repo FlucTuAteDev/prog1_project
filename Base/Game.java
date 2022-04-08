@@ -137,7 +137,7 @@ public class Game {
 							return; // TODO: error message
 
 						int amount = IO.scanInt("Darab", 1, maxAmount);
-						v.setCount(v.getCount() + amount);
+						v.setMaxCount(v.getMaxCount() + amount);
 						money -= amount * v.price;
 					},
 					"%-15s (💲: %2s, ⚔: %2s - %2s, ❤: %2s, 🚀: %2s, 🙌: %2s, %3s db)",
@@ -168,7 +168,7 @@ public class Game {
 		Random rand = new Random();
 		for (Unit unit : ai.getUnits()) {
 			int row, col;
-			unit.setCount(50);
+			unit.setMaxCount(50);
 			do {
 				row = rand.nextInt(Board.ROWS);
 				col = rand.nextInt(Board.COLS - 2, Board.COLS);
@@ -225,7 +225,7 @@ public class Game {
 					
 					spellMenu.addItem(new MenuItem<>(spell, null,
 					v -> v.cast(), 
-					"%s", v -> v.name));
+					"%s - %s", v -> v.icon, v -> v.name));
 				}
 				spellMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
 				

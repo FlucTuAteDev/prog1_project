@@ -62,13 +62,13 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		draw();
 	}
 	public void takeDamage(double amt) {
-		int health = this.health - (int)Math.round(amt);
-		if (health < 0) {
+		int res = this.health - (int)Math.round(amt);
+		if (res < 0) {
 			this.health = 0;
 			this.count = 0;
 		}
 
-		this.health = health;
+		this.health = res;
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
 		draw();
 	}

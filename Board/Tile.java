@@ -8,9 +8,10 @@ import Base.Console;
 import Base.Console.Alignment;
 import Units.Unit;
 import View.Colors.*;
+import View.Drawable;
 import View.View;
 
-public class Tile {
+public class Tile implements Drawable {
 	public static final int ROWS = 2;
 	public static final int COLS = 2 * ROWS;
 	public static final RGB lightBg = Colors.WHITE;
@@ -72,6 +73,7 @@ public class Tile {
 		setCursor(0, 0);
 	}
 
+	@Override
 	public void draw() {
 		setCursor();
 		if (this.hasUnit()) {

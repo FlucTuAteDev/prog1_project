@@ -7,7 +7,7 @@ import View.IO;
 
 public class Fireball extends Spell {
 	public Fireball(Hero hero) {
-		super("Tűzlabda", 120, 9, 20, hero);
+		super("Tűzlabda", "☄", 120, 9, 20, hero);
 	}
 
 	@Override
@@ -17,7 +17,6 @@ public class Fireball extends Spell {
 		if (tile.hasUnit()) {
 			Unit unit = tile.getUnit();
 			unit.takeDamage(this.getValue());
-			unit.draw();
 		}
 
 		for (Tile neighbour : tile.getNeighbours()) {
@@ -25,7 +24,13 @@ public class Fireball extends Spell {
 
 			Unit unit = neighbour.getUnit();
 			unit.takeDamage(this.getValue());
-			unit.draw();
 		}
+
+		this.hero.useManna(this.manna);
+	}
+
+	@Override
+	public void effect(Tile tile) {
+		tile.setCursor();
 	}
 }

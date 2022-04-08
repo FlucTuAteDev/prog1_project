@@ -1,6 +1,7 @@
 package Spells;
 
 import Base.Game;
+import Board.Tile;
 import Hero.Hero;
 import Menu.*;
 import Menu.Items.MenuItem;
@@ -9,7 +10,7 @@ import View.Colors.Colors;
 
 public class Resurrection extends Spell {
 	public Resurrection(Hero hero) {
-		super("Feltámasztás", 120, 6, 50, hero);
+		super("Feltámasztás", "💉", 120, 6, 50, hero);
 	}
 
 	@Override
@@ -22,10 +23,15 @@ public class Resurrection extends Spell {
 				v -> {
 					double heal = v.hero.getSkill("magic").getValue() * this.multiplier;
 					v.heal(heal);
-					v.draw();
 				}, "%s", v -> v.icon));
 		}
 
 		menu.display();
+		this.hero.useManna(this.manna);
+	}
+
+	@Override
+	public void effect(Tile tile) {
+		
 	}
 }
