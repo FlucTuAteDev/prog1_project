@@ -10,7 +10,7 @@ public class BasicMenu<T> extends Menu<T> {
 	}
 
 	@Override
-	public void display() {
+	public T display() {
 		view.clear();
 		Console.println(this.name);
 
@@ -36,5 +36,7 @@ public class BasicMenu<T> extends Menu<T> {
 		
 		if (selectedItem.next != null)
 			selectedItem.next.display();
+
+		return selectedItem.value;
 	}
 }

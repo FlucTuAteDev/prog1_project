@@ -10,7 +10,7 @@ import View.Colors.Colors;
 
 public class Resurrection extends Spell {
 	public Resurrection(Hero hero) {
-		super("Feltámasztás", "💉", 120, 6, 50, hero);
+		super("Feltámasztás", "💉", Colors.HEAL, 120, 6, 50, hero);
 	}
 
 	@Override
@@ -26,12 +26,13 @@ public class Resurrection extends Spell {
 				}, "%s", v -> v.icon));
 		}
 
-		menu.display();
-		this.hero.useManna(this.manna);
-	}
-
-	@Override
-	public void effect(Tile tile) {
+		Tile selectedTile = menu.display().getTile();
+		this.effect(selectedTile);
+		try {
+			Thread.sleep(Spell.EFFECT_TIME);
+		} catch (Exception e) { System.exit(1); }
+		selectedTile.draw();
 		
+		this.hero.useManna(this.manna);
 	}
 }

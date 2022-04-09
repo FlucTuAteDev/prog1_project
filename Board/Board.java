@@ -3,9 +3,10 @@ package Board;
 import Base.Console;
 import Hero.Hero;
 import Units.*;
+import View.Drawable;
 import View.View;
 
-public class Board {
+public class Board implements Drawable {
 	public static final int ROWS = 10;
 	public static final int CELL_ROWS = 2;
 	public static final int HEIGHT = CELL_ROWS * ROWS;
@@ -43,7 +44,12 @@ public class Board {
 		}
 	}
 
-	public void drawBoard() {
+	public Tile getTile(int row, int col) {
+		return board[row][col];
+	}
+
+	@Override
+	public void draw() {
 		Console.clearScreen();
 		for (int i = 0; i < ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
@@ -53,16 +59,5 @@ public class Board {
 		}
 
 		Console.resetStyles();
-	}
-
-	public void setColors(Unit unit) {
-		Hero hero = unit.hero;
-
-		Console.setBackground(hero.COLOR);
-		Console.setForeground(hero.TEXT_COLOR);
-	}
-
-	public Tile getTile(int row, int col) {
-		return board[row][col];
 	}
 }

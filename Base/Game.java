@@ -29,9 +29,9 @@ public class Game {
 	public static Hero player = new Hero("Játékos", Colors.DARK_BLUE, playerView);
 	public static Hero ai = new Hero("AI", Colors.DARK_GREEN, aiView); // TODO: AI
 	public static Board	board = new Board(player, ai);
+	public static List<Unit> units = new ArrayList<>();
 
 	private int money = 0;
-	private List<Unit> units = new ArrayList<>();
 
 	public Game() {
 		player.addUnit(new Farmer(player));
@@ -150,7 +150,7 @@ public class Game {
 	}
 
 	public void placeUnits() {
-		board.drawBoard();
+		board.draw();
 		// Asks the user where to draw each unit
 		for (Unit unit : player.getUnits()) {
 			// DEBUG ONLY COMMENT
@@ -192,7 +192,7 @@ public class Game {
 				
 				belowView.clear();
 				Console.print("%d. kör. Most következik: ", round);
-				board.setColors(unit);
+				unit.hero.setColors();
 				Console.println("%s (%d)", unit.icon, unit.getCount());
 				Console.resetStyles();
 
@@ -201,9 +201,7 @@ public class Game {
 					unitAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
 							Colors.textFromBg(attackableUnit.hero.COLOR),
 							attackableUnit.hero.COLOR,
-							v -> {
-								v.attack(attackableUnit);
-							},
+							v -> v.attack(attackableUnit),
 							"%s", v -> v.icon));
 				}
 				unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
@@ -258,14 +256,47 @@ public class Game {
 		}
 	}
 
-	public void run() {
-		this.init();
+	private void placeRandom() {
+		board.draw();
+		Random rand = new Random();
+		
+		player.getSpellValues().forEach(x -> x.setActive());
 
-		this.placeUnits();
+		for (Unit unit : player.getUnits()) {
+			int row, col;
+			unit.setMaxCount(50);
+			do {
+				row = rand.nextInt(Board.ROWS);
+				col = rand.nextInt(0, 2);
+			} while (board.getTile(row, col).hasUnit());
+			unit.setTile(board.getTile(row, col));
+		}
+
+		for (Unit unit : ai.getUnits()) {
+			int row, col;
+			unit.setMaxCount(50);
+			do {
+				row = rand.nextInt(Board.ROWS);
+				col = rand.nextInt(Board.COLS - 2, Board.COLS);
+			} while (board.getTile(row, col).hasUnit());
+			unit.setTile(board.getTile(row, col));
+		}
+	}
+
+	public void run() {
+		// Console.clearScreen();
+		// this.init();
+
+		// this.placeUnits();
+		this.placeRandom();
 
 		this.update();
 
 		Console.setCursorPosition(Console.HEIGHT, 0);
+	}
+
+	public List<Unit> getUnits() {
+		return units;
 	}
 
 	private boolean takeMoney(int amt) {

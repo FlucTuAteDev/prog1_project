@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
+import java.util.logging.Logger;
 
 import Base.Console;
 import Base.Console.Alignment;
@@ -99,6 +100,11 @@ public class Hero implements Drawable {
 		usedManna += amt;
 		draw();
 		return true;
+	}
+
+	public void setColors() {
+		Console.setBackground(this.COLOR);
+		Console.setForeground(this.TEXT_COLOR);
 	}
 
 	@Override

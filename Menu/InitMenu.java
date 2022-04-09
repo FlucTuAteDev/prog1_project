@@ -12,7 +12,7 @@ public class InitMenu<T> extends Menu<T> {
 		super(name, view);
 	}
 
-	public void display() {
+	public T display() {
 		Console.clearScreen();
 		// Menu header
 		Console.println("-".repeat(Console.WIDTH));
@@ -54,8 +54,10 @@ public class InitMenu<T> extends Menu<T> {
 
 		MenuItem<T> selectedItem = this.items.get(selected);
 		selectedItem.action.accept(selectedItem.value);
-
+ 
 		if (selectedItem.next != null)
 			selectedItem.next.display();
+
+		return selectedItem.value;
 	}
 }

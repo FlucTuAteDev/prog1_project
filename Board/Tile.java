@@ -23,6 +23,7 @@ public class Tile implements Drawable {
 	public final View view;
 	private Unit unit;
 	private Set<Tile> neighbours;
+	private String spacer =  " ".repeat(COLS);
 
 	public Tile(int row, int col, View view) {
 		this.row = row;
@@ -70,7 +71,26 @@ public class Tile implements Drawable {
 		view.setCursorPosItion(row * ROWS + 1 + rOffset, col * COLS + 1 + cOffset);
 	}
 	public void setCursor() {
-		setCursor(0, 0);
+		setCursor(0, 0); // Default parameter buzis
+	}
+
+	public static int distance(Tile a, Tile b) {
+		return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
+	}
+
+	public void draw(String... rows) {
+		if (rows.length > ROWS)
+			return;
+
+		for (int i = 0; i < rows.length; i++) {
+			setCursor(i, 0);
+			Console.printAligned(Alignment.CENTER, COLS, rows[i]);
+		}
+
+		for (int i = rows.length; i < ROWS; i++) {
+			setCursor(i, 0);
+			Console.print(spacer);
+		}
 	}
 
 	@Override
@@ -83,18 +103,12 @@ public class Tile implements Drawable {
 
 		Console.setBackground(bgColor());
 		Console.setForeground(fgColor());
-
 		Console.printAligned(Alignment.CENTER, COLS, "%c%d", 'a' + col, row + 1);
-		String spaces =  " ".repeat(COLS);
 		for (int i = 1; i < ROWS; i++) {
 			setCursor(i, 0);
-			Console.print(spaces);
+			Console.print(spacer);
 		}
 		Console.resetStyles();
-	}
-
-	public static int distance(Tile a, Tile b) {
-		return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
 	}
 
 	@Override
@@ -110,7 +124,6 @@ public class Tile implements Drawable {
 
 		return false;
 	}
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(row, col);

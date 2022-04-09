@@ -50,6 +50,14 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public boolean canMoveTo(Tile tile) {
 		return Tile.distance(this.tile, tile) <= speed;
 	}
+	public boolean move(Tile tile) {
+		if (tile.hasUnit() || !canMoveTo(tile))
+			return false;
+
+		this.tile.setUnit(null);
+		setTile(tile);
+		return true;
+	}
 
 	public void attack(Unit other) {
 		if (Arrays.stream(tile.getNeighbours()).anyMatch(x -> x.equals(other.tile)))
@@ -66,6 +74,7 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		if (res < 0) {
 			this.health = 0;
 			this.count = 0;
+			return;
 		}
 
 		this.health = res;
@@ -145,21 +154,15 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public void draw() {
 		if (this.tile == null) return;
 
-		this.tile.setCursor();
 		Console.setBackground(this.hero.COLOR);
 		Console.setForeground(this.hero.TEXT_COLOR);
-		Console.printAligned(Alignment.CENTER, Tile.COLS, "%s", this.icon);
-		this.tile.setCursor(1, 0);
-		Console.printAligned(Alignment.CENTER, Tile.COLS, "%d", this.getCount());
+		this.tile.draw(this.icon, String.valueOf(this.getCount()));
 		Console.resetStyles();
-	}
 
-	public boolean move(Tile tile) {
-		if (tile.hasUnit() || !canMoveTo(tile))
-			return false;
-
-		this.tile.setUnit(null);
-		setTile(tile);
-		return true;
+		// this.tile.setCursor();
+		// Console.printAligned(Alignment.CENTER, Tile.COLS, "%s", this.icon);
+		// this.tile.setCursor(1, 0);
+		// Console.printAligned(Alignment.CENTER, Tile.COLS, "%d", this.getCount());
+		// Console.resetStyles();
 	}
 }

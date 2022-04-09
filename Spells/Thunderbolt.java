@@ -10,7 +10,7 @@ import Menu.Items.MenuItem;
 
 public class Thunderbolt extends Spell {
 	public Thunderbolt(Hero hero) {
-		super("Villámcsapás", "⚡", 60, 5, 30, hero);
+		super("Villámcsapás", "⚡", Colors.DAMAGE, 60, 5, 30, hero);
 	}
 
 	@Override
@@ -27,12 +27,13 @@ public class Thunderbolt extends Spell {
 				}, "%s", v -> v.icon));
 		}
 
-		menu.display();
-		this.hero.useManna(this.manna);
-	}
+		Tile selectedTile = menu.display().getTile();
+		this.effect(selectedTile);
+		try {
+			Thread.sleep(Spell.EFFECT_TIME);
+		} catch (Exception e) { System.exit(1); }
+		selectedTile.draw();
 
-	@Override
-	public void effect(Tile tile) {
-		
+		this.hero.useManna(this.manna);
 	}
 }

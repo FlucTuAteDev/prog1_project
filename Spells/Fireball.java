@@ -1,30 +1,42 @@
 package Spells;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+
+import Base.Console;
 import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
 import View.IO;
+import View.Colors.Colors;
 
 public class Fireball extends Spell {
 	public Fireball(Hero hero) {
-		super("Tűzlabda", "☄", 120, 9, 20, hero);
+		super("Tűzlabda", "🔥", Colors.DAMAGE, 120, 9, 20, hero);
 	}
 
 	@Override
 	public void cast() {
 		Tile tile = IO.scanTile();
+		List<Tile> affectedTiles = new ArrayList<>(Arrays.asList(tile.getNeighbours()));
+		affectedTiles.add(tile);
 
-		if (tile.hasUnit()) {
-			Unit unit = tile.getUnit();
-			unit.takeDamage(this.getValue());
+		for (Tile affectedTile : affectedTiles) {
+			if (affectedTile.hasUnit()) {
+				Unit unit = affectedTile.getUnit();
+				unit.takeDamage(this.getValue());
+			}
+
+			this.effect(affectedTile);
 		}
 
-		for (Tile neighbour : tile.getNeighbours()) {
-			if (!neighbour.hasUnit()) continue;
-
-			Unit unit = neighbour.getUnit();
-			unit.takeDamage(this.getValue());
-		}
+		try {
+			Thread.sleep(Spell.EFFECT_TIME);
+		} catch (Exception e) { System.exit(1); }
+		
+		// Restore tiles
+		affectedTiles.forEach(Tile::draw);
 
 		this.hero.useManna(this.manna);
 	}
@@ -32,5 +44,9 @@ public class Fireball extends Spell {
 	@Override
 	public void effect(Tile tile) {
 		tile.setCursor();
+		Console.setBackground(Colors.DAMAGE);
+		Console.setForeground(Colors.textFromBg(Colors.DAMAGE));
+		tile.draw(this.icon);
+		Console.resetStyles();
 	}
 }

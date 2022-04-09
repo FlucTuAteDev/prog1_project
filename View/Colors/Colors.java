@@ -15,9 +15,12 @@ public final class Colors {
 	public static final RGB BLUE = new RGB(0, 200, 200);
 	public static final RGB DARK_BLUE = new RGB(0, 100, 200);
 	public static final RGB YELLOW = new RGB(255, 255, 0);
-
+	
 	public static final RGB DEFAULT_BG = new RGB(12, 12, 12);
 	public static final RGB DEFAULT_FG = new RGB(204, 204, 204);
+
+	public static final RGB DAMAGE = new RGB(150, 10, 10);
+	public static final RGB HEAL = new RGB(50, 200, 50);
 
 	public static RGB textFromBg(RGB bg) {
 		double L = ((bg.r * 0.299) + (bg.g * 0.587) + (bg.b * 0.114)); // HUH?

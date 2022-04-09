@@ -41,5 +41,5 @@ public abstract class Menu<T> {
 	 * @return Where to put the cursor
 	 */
 	
-	public abstract void display();
+	public abstract T display();
 }
