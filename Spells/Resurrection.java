@@ -15,6 +15,9 @@ public class Resurrection extends Spell {
 
 	@Override
 	public void cast() {
+		if (!this.hero.useManna(this.manna))
+			return;
+
 		Menu<Unit> menu = new BasicMenu<>("Feltámasztható egységek: ", Game.menuView);
 		for (Unit unit : this.hero.getUnits()) {
 			menu.addItem(new MenuItem<>(unit, null,
@@ -32,7 +35,5 @@ public class Resurrection extends Spell {
 			Thread.sleep(Spell.EFFECT_TIME);
 		} catch (Exception e) { System.exit(1); }
 		selectedTile.draw();
-		
-		this.hero.useManna(this.manna);
 	}
 }

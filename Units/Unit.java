@@ -19,8 +19,8 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public final int maxDamage;
 	public final int baseHealth;
 	public final int speed;
-	public final int initiative;
-
+	public final int baseInitiative;
+	
 	private int count;
 	private int maxCount;
 	private int health;
@@ -30,7 +30,7 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	Random random = new Random();
 	
 	public Unit(String name, String icon, Hero hero, int price, int minDamage, int maxDamage, int baseHealth, int speed,
-			int initiative) {
+			int baseInitiative) {
 		this.name = name;
 		this.icon = icon;
 		this.hero = hero;
@@ -40,7 +40,7 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		this.maxDamage = maxDamage;
 		this.baseHealth = baseHealth;
 		this.speed = speed;
-		this.initiative = initiative;
+		this.baseInitiative = baseInitiative;
 
 		this.count = 0;
 		this.maxCount = 0;
@@ -59,13 +59,8 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		return true;
 	}
 
-	public void attack(Unit other) {
-		if (Arrays.stream(tile.getNeighbours()).anyMatch(x -> x.equals(other.tile)))
-			other.takeDamage(this);
-	}
-
 	public void heal(double amt) {
-		this.health = Math.min(this.health + (int)Math.round(amt), this.maxCount);
+		this.health = Math.min(this.health + (int)Math.round(amt), this.maxCount * this.baseHealth);
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
 		draw();
 	}
@@ -99,7 +94,7 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public int getDamage() {
 		if (this.minDamage == this.maxDamage) return this.minDamage;
 
-		return random.nextInt(this.minDamage, this.maxDamage) * this.count;
+		return random.nextInt(this.minDamage, this.maxDamage + 1) * this.count;
 	}
 
 	public int getCount() {
@@ -138,6 +133,10 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		return this.health;
 	}
 
+	public int getInitiative() {
+		return this.baseInitiative + (int)this.hero.getSkill("moral").getValue();
+	}
+
 	public List<Unit> attackableUnits() {
 		return Arrays.stream(tile.getNeighbours())
 			.filter(x -> x.hasUnit() && x.getUnit().hero != this.hero)
@@ -147,22 +146,15 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	@Override
 	public int compareTo(Unit other) {
 		// Descending order
-		return other.initiative - this.initiative;
+		return other.getInitiative() - this.getInitiative();
 	}
 
 	@Override
 	public void draw() {
 		if (this.tile == null) return;
 
-		Console.setBackground(this.hero.COLOR);
-		Console.setForeground(this.hero.TEXT_COLOR);
+		this.hero.setColors();
 		this.tile.draw(this.icon, String.valueOf(this.getCount()));
 		Console.resetStyles();
-
-		// this.tile.setCursor();
-		// Console.printAligned(Alignment.CENTER, Tile.COLS, "%s", this.icon);
-		// this.tile.setCursor(1, 0);
-		// Console.printAligned(Alignment.CENTER, Tile.COLS, "%d", this.getCount());
-		// Console.resetStyles();
 	}
 }

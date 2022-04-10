@@ -15,6 +15,9 @@ public class Thunderbolt extends Spell {
 
 	@Override
 	public void cast() {
+		if (!this.hero.useManna(this.manna))
+			return;
+
 		Menu<Unit> menu = new BasicMenu<>("Támadható egységek: ", Game.menuView);
 		Hero enemy = this.hero == Game.player ? Game.ai : Game.player;
 		for (Unit unit : enemy.getUnits()) {
@@ -33,7 +36,5 @@ public class Thunderbolt extends Spell {
 			Thread.sleep(Spell.EFFECT_TIME);
 		} catch (Exception e) { System.exit(1); }
 		selectedTile.draw();
-
-		this.hero.useManna(this.manna);
 	}
 }

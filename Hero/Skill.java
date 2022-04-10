@@ -28,6 +28,9 @@ public class Skill {
 		if (res > MAX_SKILL)
 			return false;
 
+		if (!this.hero.takeMoney(this.hero.getSkillPrice()))
+			return false;
+
 		this.points = res;
 		this.hero.incrementSkillPrice();
 		return true;

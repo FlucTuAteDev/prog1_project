@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Map.Entry;
-import java.util.logging.Logger;
 
 import Base.Console;
 import Base.Console.Alignment;
@@ -27,11 +26,14 @@ public class Hero implements Drawable {
 	public final View view;
 	public final String name;
 
+	public boolean usedAbility = false;
+
 	private Map<String, Skill> skills = new LinkedHashMap<>();
 	private Map<String, Spell> spells = new LinkedHashMap<>();
 	private List<Unit> units = new ArrayList<>();
 	private int skillPrice = 5;
 	private int usedManna = 0;
+	private int money;
 
 	public Hero(String name, RGB color, View view) {
 		this.name = name;
@@ -53,6 +55,19 @@ public class Hero implements Drawable {
 
 	public void attack(Unit unit) {
 		unit.takeDamage(this);
+	}
+
+	public int getMoney() {
+		return this.money;
+	}
+	public void setMoney(int amt) {
+		this.money = amt;
+	}
+	public boolean takeMoney(int amt) {
+		if (amt > this.money) return false;
+
+		this.money -= amt;
+		return true;
 	}
 
 	public Set<Entry<String, Skill>> getSkills() {
@@ -92,13 +107,14 @@ public class Hero implements Drawable {
 	public int getManna() {
 		return (int)getSkill("intelligence").getValue() - usedManna;
 	}
-
 	public boolean useManna(int amt) {
 		int res = getManna() - amt;
 		if (res < 0) return false;
 
 		usedManna += amt;
+		Console.saveCursor();
 		draw();
+		Console.restoreCursor();
 		return true;
 	}
 

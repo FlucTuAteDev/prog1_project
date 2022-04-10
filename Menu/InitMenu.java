@@ -3,7 +3,6 @@ import Base.Console;
 import Base.Console.*;
 import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
-import View.IO;
 import View.View;
 
 public class InitMenu<T> extends Menu<T> {
@@ -13,7 +12,7 @@ public class InitMenu<T> extends Menu<T> {
 	}
 
 	public T display() {
-		Console.clearScreen();
+		view.clear();
 		// Menu header
 		Console.println("-".repeat(Console.WIDTH));
 
@@ -50,7 +49,7 @@ public class InitMenu<T> extends Menu<T> {
 		Console.resetStyles();
 		Console.println("");
 
-		int selected = IO.scanInt("Válasszon", 1, this.items.size()) - 1;
+		int selected = Console.scanInt("Válasszon", 1, this.items.size()) - 1;
 
 		MenuItem<T> selectedItem = this.items.get(selected);
 		selectedItem.action.accept(selectedItem.value);

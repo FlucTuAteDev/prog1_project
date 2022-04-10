@@ -8,7 +8,6 @@ import Base.Console;
 import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
-import View.IO;
 import View.Colors.Colors;
 
 public class Fireball extends Spell {
@@ -18,7 +17,10 @@ public class Fireball extends Spell {
 
 	@Override
 	public void cast() {
-		Tile tile = IO.scanTile();
+		if (!this.hero.useManna(this.manna))
+			return;
+
+		Tile tile = Console.scanTile();
 		List<Tile> affectedTiles = new ArrayList<>(Arrays.asList(tile.getNeighbours()));
 		affectedTiles.add(tile);
 
@@ -37,8 +39,6 @@ public class Fireball extends Spell {
 		
 		// Restore tiles
 		affectedTiles.forEach(Tile::draw);
-
-		this.hero.useManna(this.manna);
 	}
 
 	@Override
