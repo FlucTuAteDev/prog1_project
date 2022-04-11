@@ -2,6 +2,7 @@ package Base;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -19,16 +20,16 @@ import View.View;
 import View.Colors.*;
 
 public class Game {
-	static int INPUT_HEIGHT = Board.HEIGHT + 1;
 	public static View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT - 1);
-	public static View belowView = new View(INPUT_HEIGHT, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
-	public static View menuView = new View(INPUT_HEIGHT + 1, 1, Console.WIDTH, Console.HEIGHT - Board.HEIGHT);
+	public static View actionView = new View(Board.HEIGHT + 2, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
+	public static View menuView = new View(actionView.top + 1, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
 	public static View errorView = new View(Console.HEIGHT, Console.WIDTH / 2 + 1, Console.WIDTH / 2, 1);
+	public static View inputView = new View(Console.HEIGHT - 1, 1, Console.WIDTH / 2, 1);
 
 	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
 	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
 	public static Hero player = new Hero("Játékos", Colors.DARK_BLUE, playerView);
-	public static Hero ai = new Hero("AI", Colors.DARK_GREEN, aiView); // TODO: AI
+	public static Hero ai = new Hero("Kompútor", Colors.DARK_GREEN, aiView); // TODO: AI
 	public static Board	board = new Board(player, ai);
 	public static List<Unit> units = new ArrayList<>();
 
@@ -45,7 +46,7 @@ public class Game {
 		units.addAll(ai.getUnits());
 	}
 
-	public void init() {
+	private void init() {
 		Menu<Integer> difficultyMenu = new InitMenu<>("Nehézségi szint", initView);
 		Menu<Object> mainMenu = new InitMenu<>("Főmenü", initView);
 		Menu<Skill> skillMenu = new InitMenu<>("Tulajdonságpontok", initView);
@@ -150,14 +151,14 @@ public class Game {
 		difficultyMenu.display();
 	}
 
-	public void placeUnits() {
+	private void placeUnits() {
 		board.draw();
 		// Asks the user where to draw each unit
 		for (Unit unit : player.getUnits()) {
 			// DEBUG ONLY COMMENT
 			// if (unit.getCount().get() == 0) continue;
 
-			belowView.clear();
+			actionView.clear();
 			Console.println("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount());
 
 			Tile tile = Console.scanTile(0, Board.ROWS, 0, 2, 
@@ -178,112 +179,14 @@ public class Game {
 		}
 	}
 
-	private void update() {
-		Menu<Object> actionMenu = new BasicMenu<>("Lehetőségek:", menuView);
-		Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
-		Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
-		Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek:", menuView);
-
-		// Sort the units by initiative
-		Collections.sort(units);
-		int round = 0;
-		while (true) {
-			int turn = 0;
-			player.usedAbility = false;
-			ai.usedAbility = false;
-			for (Unit unit : units) {
-				player.draw();
-				ai.draw();
-				Hero curr = unit.hero;
-				Hero enemy = unit.hero == player ? ai : player;
-				
-				belowView.clear();
-				Console.print("%d. kör. Sorrend: ", round + 1);
-
-				for (int i = 0; i < units.size(); i++) {
-					if (i != 0) Console.print("->");
-
-					Unit next = units.get((turn + i) % units.size());
-					next.hero.setColors();
-					Console.print(" %s ", next.icon);
-					Console.resetStyles();
-				}
-
-				// Unit attacks
-				for (Unit attackableUnit : unit.attackableUnits()) {
-					unitAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
-							Colors.textFromBg(attackableUnit.hero.COLOR),
-							attackableUnit.hero.COLOR,
-							v -> v.takeDamage(unit),
-							"%s", v -> v.icon));
-				}
-				unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-				
-				if (!curr.usedAbility) {
-					// Hero attacks
-					for (Unit attackableUnit : enemy.getUnits()) {
-						heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
-							Colors.textFromBg(enemy.COLOR), 
-							enemy.COLOR, 
-							v -> {
-								v.hero.attack(attackableUnit);
-								v.hero.usedAbility = true;
-							}, "%s", v -> v.icon));
-					}
-					heroAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-					
-					// Hero spells
-					for (Spell spell : curr.getSpellValues()) {
-						if (!spell.isActive()) continue;
-						
-						spellMenu.addItem(new MenuItem<>(spell, null,
-						v -> {
-							v.cast();
-							v.hero.usedAbility = true;
-						}, 
-						"%s - %s", v -> v.icon, v -> v.name));
-					}
-					spellMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-				}
-				
-				// Actions
-				if (unit.attackableUnits().size() != 0)
-					actionMenu.addItem(new MenuItem<>(null, unitAttackableMenu, v -> {}, "Egység -> Támadás"));
-
-				actionMenu.addItem(new MenuItem<>(null, null,
-					v -> {
-						Console.scanTile(
-							x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null,
-							x -> !unit.move(x) ? "Az egység nem tud a megadott cellára lépni!" : null
-						);
-				}, "Egység -> Mozgás"));
-				actionMenu.addItem(new MenuItem<>(null, null, v -> {}, "Egység -> Várakozás"));
-
-				if (!curr.usedAbility) {
-					actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
-					
-					if (curr.getSpells().size() != 0)
-						actionMenu.addItem(new MenuItem<>(null, spellMenu, v -> {}, "Hős -> Varázslás"));
-				}
-
-				actionMenu.display();
-
-				actionMenu.clearItems();
-				unitAttackableMenu.clearItems();
-				heroAttackableMenu.clearItems();
-				spellMenu.clearItems();
-				turn++;
-			}
-			// End of round
-			round++;
-		}
-	}
-
 	private void placeRandom() {
 		board.draw();
 		Random rand = new Random();
 		
+		player.setMoney(9999);
 		player.getSpellValues().forEach(x -> x.setActive());
+		player.getSkill("magic").addPoints(9);
+		player.getSkill("intelligence").addPoints(9);
 
 		for (Unit unit : player.getUnits()) {
 			int row, col;
@@ -306,9 +209,117 @@ public class Game {
 		}
 	}
 
+	private void update() {
+		Menu<Object> actionMenu = new BasicMenu<>("Lehetőségek:", menuView);
+		Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
+		Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
+		Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek:", menuView);
+
+		// Sort the units by initiative
+		Collections.sort(units);
+		int round = 0;
+		while (true) {
+			player.usedAbility = false;
+			ai.usedAbility = false; 
+
+			for (Unit unit : units) {
+				if (unit.isDead()) continue;
+				
+				Hero hero = unit.hero;
+				Hero enemy = unit.hero == player ? ai : player;
+
+				player.draw();
+				ai.draw();
+				unit.highlight();
+				
+				actionView.clear();
+				Console.print("%d. kör. Sorrend: ", round + 1);
+
+				// Draw round order
+				for (int i = 0; i < units.size(); i++) {
+					Unit next = units.get(i);
+					if (next.isDead()) continue;
+
+					if (next == unit) Console.setBackground(Colors.brighten(next.hero.COLOR, .5));
+					else next.hero.setColors();
+
+					Console.print(" %s ", next.icon);
+					Console.resetStyles();
+				}
+
+				// Unit attacks
+				for (Unit attackableUnit : unit.attackableUnits()) {
+					unitAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
+							Colors.textFromBg(attackableUnit.hero.COLOR),
+							attackableUnit.hero.COLOR,
+							v -> v.takeDamage(unit),
+							"%s", v -> v.icon));
+				}
+				unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
+				
+				var purchasableSpells = hero.getSpellValues().stream().filter(x -> x.isActive() && x.manna <= hero.getManna()).toList();
+				if (!hero.usedAbility) {
+					// Hero attacks
+					for (Unit attackableUnit : enemy.getUnits()) {
+						heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
+							Colors.textFromBg(enemy.COLOR), 
+							enemy.COLOR, 
+							v -> {
+								v.takeDamage(hero);
+								hero.usedAbility = true;
+							}, "%s", v -> v.icon));
+					}
+					heroAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
+					
+					// Hero spells
+					for (Spell spell : purchasableSpells) {
+						spellMenu.addItem(new MenuItem<>(spell, null,
+						v -> {
+							v.cast();
+							hero.usedAbility = true;
+						}, 
+						"%s - %s", v -> v.icon, v -> v.name));
+					}
+					spellMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
+				}
+				
+				// Actions
+				actionMenu.addItem(new MenuItem<>(null, null,
+					v -> {
+						Console.scanTile(
+							x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null,
+							x -> !unit.move(x) ? "Az egység nem tud a megadott cellára lépni!" : null
+						);
+				}, "Egység -> Mozgás"));
+				actionMenu.addItem(new MenuItem<>(null, null, v -> {}, "Egység -> Várakozás"));
+
+				if (unit.attackableUnits().size() != 0)
+					actionMenu.addItem(new MenuItem<>(null, unitAttackableMenu, v -> {}, "Egység -> Támadás"));
+
+				if (!hero.usedAbility) {
+					actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
+					
+					if (purchasableSpells.size() != 0)
+						actionMenu.addItem(new MenuItem<>(null, spellMenu, v -> {}, "Hős -> Varázslás"));
+				}
+
+				actionMenu.display();
+
+				actionMenu.clearItems();
+				unitAttackableMenu.clearItems();
+				heroAttackableMenu.clearItems();
+				spellMenu.clearItems();
+
+				unit.draw(); // remove highlight
+			}
+			// End of round
+			round++;
+		}
+	}
+
 	public void run() {
 		// Console.clearScreen();
-		this.init();
+		// this.init();
 
 		// this.placeUnits();
 		this.placeRandom();
@@ -327,5 +338,19 @@ public class Game {
 		Console.setForeground(Colors.RED);
 		errorView.printlnAligned(Alignment.RIGHT, format, args);
 		Console.resetStyles();
+	}
+
+	static View messageView = new View(Board.HEIGHT + 2, Console.WIDTH / 2 + 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT - 2);
+	private static List<String> messages = new ArrayList<>();
+	public static void logMessage(String format, Object... args) {
+		// If the messages overflow remove the first element
+		if (messages.size() > messageView.height) 
+			messages.remove(0);
+
+		messages.add(String.format(format, args));
+
+		messageView.clear();
+		for (String msg : messages)
+			messageView.println(msg);
 	}
 }

@@ -24,8 +24,7 @@ public class Resurrection extends Spell {
 				Colors.textFromBg(this.hero.COLOR), 
 				this.hero.COLOR,
 				v -> {
-					double heal = v.hero.getSkill("magic").getValue() * this.multiplier;
-					v.heal(heal);
+					v.heal(this);
 				}, "%s", v -> v.icon));
 		}
 

@@ -130,9 +130,32 @@ public class Hero implements Drawable {
 		view.println("");
 
 		for (Unit unit : units) {
-			view.printlnAligned(Alignment.CENTER, Colors.wrapWithColor(" %s %s(%d/%d) ", unit.hero.COLOR, unit.hero.TEXT_COLOR), unit.name, unit.icon, unit.getCount(), unit.getMaxCount());
+			view.printlnAligned(Alignment.CENTER, 
+				Colors.wrapWithColor(" %-10s %s(%2d/%2d) ", this.COLOR, this.TEXT_COLOR), 
+				unit.name, unit.icon, unit.getCount(), unit.getMaxCount());
+		}
+		
+		view.println("");
+		
+		for (Skill skill : skills.values()) {
+			view.printlnAligned(Alignment.CENTER, 
+			"%-10s - %2d/%2d", 
+			skill.name, skill.getPoints(), Skill.MAX_SKILL);
+		}
+
+		view.println("");
+		
+		for (Spell spell : spells.values().stream().filter(x -> x.isActive()).toList()) {
+			view.printlnAligned(Alignment.CENTER, 
+			"%-15s %3s",
+			spell.name, spell.icon);
 		}
 		// view.println("", args);
+	}
+
+	@Override
+	public String toString() {
+		return Colors.wrapWithColor(" " + this.name + " ", COLOR, TEXT_COLOR);
 	}
 
 	// public Unit[] getUnitsFrom(Collection<Unit> units) {

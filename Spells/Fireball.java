@@ -27,7 +27,7 @@ public class Fireball extends Spell {
 		for (Tile affectedTile : affectedTiles) {
 			if (affectedTile.hasUnit()) {
 				Unit unit = affectedTile.getUnit();
-				unit.takeDamage(this.getValue());
+				unit.takeDamage(this);
 			}
 
 			this.effect(affectedTile);

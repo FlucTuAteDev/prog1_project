@@ -38,4 +38,17 @@ public final class Colors {
 	public static String wrapWithColor(String str, RGB foreground) {
 		return wrapWithColor(str, null, foreground);
 	}
+
+	public static RGB brighten(RGB color, double fraction) {
+        int red = (int) Math.round(Math.min(255, color.r + 255 * fraction));
+        int green = (int) Math.round(Math.min(255, color.g + 255 * fraction));
+        int blue = (int) Math.round(Math.min(255, color.b + 255 * fraction));
+
+        return new RGB(red, green, blue);
+    }
+
+	public static void setColors(RGB background) {
+		Console.setBackground(background);
+		Console.setForeground(textFromBg(background));
+	}
 }

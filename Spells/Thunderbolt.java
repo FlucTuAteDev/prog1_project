@@ -10,7 +10,7 @@ import Menu.Items.MenuItem;
 
 public class Thunderbolt extends Spell {
 	public Thunderbolt(Hero hero) {
-		super("Villámcsapás", "⚡", Colors.DAMAGE, 60, 5, 30, hero);
+		super("Villámcsapás", "🌩", Colors.DAMAGE, 60, 5, 30, hero);
 	}
 
 	@Override
@@ -25,8 +25,7 @@ public class Thunderbolt extends Spell {
 				Colors.textFromBg(enemy.COLOR), 
 				enemy.COLOR,
 				v -> {
-					double damage = v.hero.getSkill("magic").getValue() * this.multiplier;
-					v.takeDamage(damage);
+					v.takeDamage(this);
 				}, "%s", v -> v.icon));
 		}
 

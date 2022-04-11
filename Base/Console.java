@@ -3,12 +3,15 @@ package Base;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.regex.MatchResult;
+import java.util.regex.Pattern;
 
 import Board.Board;
 import Board.Tile;
 import Utils.Maths;
 import Utils.Position;
 import Utils.Functions.ConverterFunction;
+import View.View;
 import View.Colors.RGB;
 
 public class Console {
@@ -38,7 +41,7 @@ public class Console {
 	private static void printBase(Alignment alignment, int width, Consumer<String> printFn, String format,
 			Object... args) {
 		String str = String.format(format, args);
-		String stripped = stripAnsi(str); // Strips ansi sequences
+		String stripped = stripAnsi(str);
 
 		String out = "";
 		switch (alignment) {
@@ -47,11 +50,12 @@ public class Console {
 				printFn.accept(str);
 				break;
 			case CENTER: {
-				int spaceLen = width - stripped.length();
-
+				int spaceLen = width - (int)stripped.length();
 				String spaces = " ".repeat(spaceLen / 2);
 				String pad = spaceLen % 2 == 0 ? "" : " ";
-				out = String.format("%s%s%s" + pad, spaces, str, spaces);
+
+				out = spaces + str + spaces + pad;
+				// out = String.format("%" + width + "." + width + "s", out);
 				printFn.accept(out);
 			}
 				break;
@@ -216,17 +220,16 @@ public class Console {
 	 * @return The scanned value converted to T
 	 */
 	@SafeVarargs
-	public static <T> T scanAndConvert(String text, ConverterFunction<String, T> converter,
-			Function<T, String>... filters) {
+	public static <T> T scanAndConvert(String text, View view, ConverterFunction<String, T> converter, Function<T, String>... filters) {
 		T res = null;
 
-		Console.clearLine();
+		view.clear();
 		Console.saveCursor();
 		while (true) {
 			Console.print("%s: ", text);
 			try {
 				String current = sc.nextLine();
-				currentPosition.row += 1; // After pressing enter the cursor will be on the next line
+				currentPosition.row += 1; // After pressing [Enter] the cursor will be on the next line
 				currentPosition.col = 0;
 
 				res = converter.apply(current);
@@ -240,11 +243,16 @@ public class Console {
 				Game.logError(e.getMessage());
 				Console.restoreCursor();
 
-				Console.clearLine();
+				view.clear();
 			}
 		}
 
 		return res;
+	}
+
+	@SafeVarargs
+	public static <T> T scanAndConvert(String text, ConverterFunction<String, T> converter, Function<T, String>... filters) {
+			return scanAndConvert(text, Game.inputView, converter, filters);
 	}
 
 	@SafeVarargs

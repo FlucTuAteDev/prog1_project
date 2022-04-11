@@ -68,7 +68,7 @@ public class Tile implements Drawable {
 	}
 
 	public void setCursor(int rOffset, int cOffset) {
-		view.setCursorPosItion(row * ROWS + 1 + rOffset, col * COLS + 1 + cOffset);
+		view.setCursorPosition(row * ROWS + 1 + rOffset, col * COLS + 1 + cOffset);
 	}
 	public void setCursor() {
 		setCursor(0, 0); // Default parameter buzis
@@ -96,7 +96,7 @@ public class Tile implements Drawable {
 	@Override
 	public void draw() {
 		setCursor();
-		if (this.hasUnit()) {
+		if (this.hasUnit() && !this.unit.isDead()) {
 			this.unit.draw();
 			return;
 		}
@@ -127,6 +127,11 @@ public class Tile implements Drawable {
 	@Override
 	public int hashCode() {
 		return Objects.hash(row, col);
+	}
+
+	@Override
+	public String toString() {
+		return String.format("%c%d", 'a' + col, row + 1);
 	}
 
 	private boolean isLight() {

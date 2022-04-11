@@ -21,7 +21,7 @@ public class View {
 		this.eraser = " ".repeat(width);
 	}
 
-	public void setCursorPosItion(int row, int col) {
+	public void setCursorPosition(int row, int col) {
 		Console.setCursorPosition(row + top, col + left);
 	}
 	
@@ -36,6 +36,12 @@ public class View {
 		}
 
 		home();
+	}
+
+	public void clearLine() {
+		Console.setCursorCol(0);
+		print(this.eraser);
+		Console.setCursorCol(0);
 	}
 	
 	public void print(String format, Object... args) {
