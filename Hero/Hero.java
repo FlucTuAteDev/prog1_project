@@ -2,6 +2,7 @@ package Hero;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,6 +10,7 @@ import java.util.Set;
 import java.util.Map.Entry;
 
 import Base.Console;
+import Base.Game;
 import Base.Console.Alignment;
 import Spells.Fireball;
 import Spells.Resurrection;
@@ -54,7 +56,13 @@ public class Hero implements Drawable {
 	}
 
 	public void attack(Unit unit) {
-		unit.takeDamage(this);
+		int damage = this.getSkill("attack").getPoints() * 10;
+
+		Game.logMessage("%s ⚔ %s: -%d❤ -> -%ddb", 
+			this, unit,
+			damage, damage / unit.baseHealth);
+
+		unit.takeDamage(damage);
 	}
 
 	public int getMoney() {
@@ -86,15 +94,23 @@ public class Hero implements Drawable {
 	public Collection<Spell> getSpellValues() {
 		return spells.values();
 	}
+	public List<Spell> getActiveSpells() {
+		return spells.values().stream().filter(x -> x.isActive()).toList();
+	}
 
 	public List<Unit> getUnits() {
 		return units;
 	}
+	public List<Unit> getAliveUnits() {
+		return units.stream().filter(x -> !x.isDead()).toList();
+	}
 	public void addUnit(Unit unit) {
 		this.units.add(unit);
+		Collections.sort(this.units);
 	}
 	public void addUnits(Collection<Unit> units) {
 		this.units.addAll(units);
+		Collections.sort(this.units);
 	}
 
 	public void incrementSkillPrice() {

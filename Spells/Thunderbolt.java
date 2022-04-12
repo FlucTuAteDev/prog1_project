@@ -4,6 +4,7 @@ import Base.Game;
 import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
+import Utils.ThreadHelper;
 import View.Colors.Colors;
 import Menu.*;
 import Menu.Items.MenuItem;
@@ -20,20 +21,18 @@ public class Thunderbolt extends Spell {
 
 		Menu<Unit> menu = new BasicMenu<>("Támadható egységek: ", Game.menuView);
 		Hero enemy = this.hero == Game.player ? Game.ai : Game.player;
-		for (Unit unit : enemy.getUnits()) {
+		for (Unit unit : enemy.getAliveUnits()) {
 			menu.addItem(new MenuItem<>(unit, null,
 				Colors.textFromBg(enemy.COLOR), 
 				enemy.COLOR,
-				v -> {
-					v.takeDamage(this);
-				}, "%s", v -> v.icon));
+				v -> {}, "%s", v -> v.icon));
 		}
 
-		Tile selectedTile = menu.display().getTile();
-		this.effect(selectedTile);
-		try {
-			Thread.sleep(Spell.EFFECT_TIME);
-		} catch (Exception e) { System.exit(1); }
-		selectedTile.draw();
+		Unit selectedUnit = menu.display();
+		this.effect(selectedUnit.getTile());
+		
+		ThreadHelper.sleep(Spell.EFFECT_TIME);
+
+		this.use(selectedUnit);
 	}
 }

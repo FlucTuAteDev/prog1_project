@@ -47,7 +47,7 @@ public final class Colors {
         return new RGB(red, green, blue);
     }
 
-	public static void setColors(RGB background) {
+	public static void setBgWithFg(RGB background) {
 		Console.setBackground(background);
 		Console.setForeground(textFromBg(background));
 	}

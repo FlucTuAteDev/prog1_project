@@ -18,6 +18,7 @@ public class Archer extends Unit {
 		if (neighbours.size() != 0)
 			return neighbours;
 		
-		return Game.units.stream().filter(x -> x.hero != this.hero).toList();
+		Hero enemy = this.hero == Game.player ? Game.ai : Game.player;
+		return enemy.getAliveUnits();
 	}
 }

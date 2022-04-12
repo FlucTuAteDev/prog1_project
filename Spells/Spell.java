@@ -1,8 +1,10 @@
 package Spells;
 
 import Base.Console;
+import Base.Game;
 import Board.Tile;
 import Hero.Hero;
+import Units.Unit;
 import View.Colors.Colors;
 import View.Colors.RGB;
 
@@ -41,6 +43,17 @@ public abstract class Spell {
 
 	public double getValue() {
 		return multiplier * hero.getSkill("magic").getValue();
+	}
+
+	public void use(Unit unit) {
+		int damage = (int)Math.round(this.getValue());
+
+		Hero hero = this.hero;
+		Game.logMessage("%s %s %s: -%d❤ -> -%ddb", 
+			hero, this.icon, unit,
+			damage, damage / unit.baseHealth);
+
+		unit.takeDamage(damage);
 	}
 
 	public abstract void cast();

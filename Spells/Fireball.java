@@ -8,6 +8,7 @@ import Base.Console;
 import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
+import Utils.ThreadHelper;
 import View.Colors.Colors;
 
 public class Fireball extends Spell {
@@ -25,17 +26,16 @@ public class Fireball extends Spell {
 		affectedTiles.add(tile);
 
 		for (Tile affectedTile : affectedTiles) {
+			// Firendy units take damage as well
 			if (affectedTile.hasUnit()) {
 				Unit unit = affectedTile.getUnit();
-				unit.takeDamage(this);
+				this.use(unit);
 			}
 
 			this.effect(affectedTile);
 		}
 
-		try {
-			Thread.sleep(Spell.EFFECT_TIME);
-		} catch (Exception e) { System.exit(1); }
+		ThreadHelper.sleep(Spell.EFFECT_TIME);
 		
 		// Restore tiles
 		affectedTiles.forEach(Tile::draw);

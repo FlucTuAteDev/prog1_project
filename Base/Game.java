@@ -23,7 +23,6 @@ public class Game {
 	public static View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT - 1);
 	public static View actionView = new View(Board.HEIGHT + 2, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
 	public static View menuView = new View(actionView.top + 1, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
-	public static View errorView = new View(Console.HEIGHT, Console.WIDTH / 2 + 1, Console.WIDTH / 2, 1);
 	public static View inputView = new View(Console.HEIGHT - 1, 1, Console.WIDTH / 2, 1);
 
 	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
@@ -187,6 +186,7 @@ public class Game {
 		player.getSpellValues().forEach(x -> x.setActive());
 		player.getSkill("magic").addPoints(9);
 		player.getSkill("intelligence").addPoints(9);
+		player.getSkill("moral").addPoints(9);
 
 		for (Unit unit : player.getUnits()) {
 			int row, col;
@@ -228,9 +228,12 @@ public class Game {
 				Hero hero = unit.hero;
 				Hero enemy = unit.hero == player ? ai : player;
 
+				// Endscreen
+				if (hero.getAliveUnits().size() == 0 || enemy.getAliveUnits().size() == 0) return;
+
 				player.draw();
 				ai.draw();
-				unit.highlight();
+				unit.select();
 				
 				actionView.clear();
 				Console.print("%d. kör. Sorrend: ", round + 1);
@@ -240,39 +243,39 @@ public class Game {
 					Unit next = units.get(i);
 					if (next.isDead()) continue;
 
-					if (next == unit) Console.setBackground(Colors.brighten(next.hero.COLOR, .5));
+					if (next == unit) Colors.setBgWithFg(Colors.brighten(next.hero.COLOR, .5));
 					else next.hero.setColors();
 
 					Console.print(" %s ", next.icon);
 					Console.resetStyles();
-				}
+				}	
 
 				// Unit attacks
 				for (Unit attackableUnit : unit.attackableUnits()) {
 					unitAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
 							Colors.textFromBg(attackableUnit.hero.COLOR),
 							attackableUnit.hero.COLOR,
-							v -> v.takeDamage(unit),
+							v -> unit.attack(v),
 							"%s", v -> v.icon));
 				}
 				unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
 				
-				var purchasableSpells = hero.getSpellValues().stream().filter(x -> x.isActive() && x.manna <= hero.getManna()).toList();
+				var usableSpells = hero.getActiveSpells().stream().filter(x -> x.manna <= hero.getManna()).toList();
 				if (!hero.usedAbility) {
 					// Hero attacks
-					for (Unit attackableUnit : enemy.getUnits()) {
+					for (Unit attackableUnit : enemy.getAliveUnits()) {
 						heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
 							Colors.textFromBg(enemy.COLOR), 
 							enemy.COLOR, 
 							v -> {
-								v.takeDamage(hero);
+								hero.attack(v);
 								hero.usedAbility = true;
 							}, "%s", v -> v.icon));
 					}
 					heroAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
 					
 					// Hero spells
-					for (Spell spell : purchasableSpells) {
+					for (Spell spell : usableSpells) {
 						spellMenu.addItem(new MenuItem<>(spell, null,
 						v -> {
 							v.cast();
@@ -297,9 +300,10 @@ public class Game {
 					actionMenu.addItem(new MenuItem<>(null, unitAttackableMenu, v -> {}, "Egység -> Támadás"));
 
 				if (!hero.usedAbility) {
-					actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
+					if (enemy.getAliveUnits().size() != 0)
+						actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
 					
-					if (purchasableSpells.size() != 0)
+					if (usableSpells.size() != 0)
 						actionMenu.addItem(new MenuItem<>(null, spellMenu, v -> {}, "Hős -> Varázslás"));
 				}
 
@@ -310,11 +314,28 @@ public class Game {
 				heroAttackableMenu.clearItems();
 				spellMenu.clearItems();
 
-				unit.draw(); // remove highlight
+				unit.deselect();	
 			}
+
+			// Enable all counter attacks
+			units.forEach(Unit::enableCounter);
 			// End of round
 			round++;
 		}
+	}
+
+	public void endScreen() {
+		boolean playerDead = player.getAliveUnits().size() == 0;
+		boolean aiDead = ai.getAliveUnits().size() == 0;
+
+		Console.clearScreen();
+		Console.setCursorPosition(Console.HEIGHT / 2, 0);
+		if (playerDead && aiDead)
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "Döntetlen - a felek kiegyenlítettek voltak.");
+		else if (playerDead)
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a jobb oldal!", Game.ai);
+		else if (aiDead)
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a bal oldal!", Game.player);
 	}
 
 	public void run() {
@@ -326,6 +347,8 @@ public class Game {
 
 		this.update();
 
+		this.endScreen();
+
 		Console.setCursorPosition(Console.HEIGHT, 0);
 	}
 
@@ -333,18 +356,24 @@ public class Game {
 		return units;
 	}
 
+	private static View errorView = new View(Console.HEIGHT, Console.WIDTH / 2 + 1, Console.WIDTH / 2, 1);
 	public static void logError(String format, Object... args) {
 		errorView.clear();
 		Console.setForeground(Colors.RED);
 		errorView.printlnAligned(Alignment.RIGHT, format, args);
 		Console.resetStyles();
 	}
+	public static void clearError() {
+		Console.saveCursor();
+		errorView.clear();
+		Console.restoreCursor();
+	}
 
 	static View messageView = new View(Board.HEIGHT + 2, Console.WIDTH / 2 + 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT - 2);
 	private static List<String> messages = new ArrayList<>();
 	public static void logMessage(String format, Object... args) {
 		// If the messages overflow remove the first element
-		if (messages.size() > messageView.height) 
+		if (messages.size() == messageView.height) 
 			messages.remove(0);
 
 		messages.add(String.format(format, args));

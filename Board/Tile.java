@@ -52,6 +52,11 @@ public class Tile implements Drawable {
 		return neighbours.toArray(Tile[]::new);
 	}
 
+	public boolean isNeighbour(Tile other) {
+		if (other == null) return false;
+		return neighbours.contains(other);
+	}
+
 	public void setUnit(Unit unit) {
 		if (unit == this.unit) return;
 		
@@ -96,7 +101,7 @@ public class Tile implements Drawable {
 	@Override
 	public void draw() {
 		setCursor();
-		if (this.hasUnit() && !this.unit.isDead()) {
+		if (this.hasUnit()) {
 			this.unit.draw();
 			return;
 		}

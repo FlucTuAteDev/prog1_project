@@ -246,6 +246,7 @@ public class Console {
 				view.clear();
 			}
 		}
+		Game.clearError();
 
 		return res;
 	}
