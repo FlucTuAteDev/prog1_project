@@ -3,8 +3,6 @@ package Base;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.regex.MatchResult;
-import java.util.regex.Pattern;
 
 import Board.Board;
 import Board.Tile;

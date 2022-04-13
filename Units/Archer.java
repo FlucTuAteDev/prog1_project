@@ -2,7 +2,6 @@ package Units;
 
 import java.util.List;
 
-import Base.Game;
 import Hero.Hero;
 
 public class Archer extends Unit {
@@ -18,7 +17,7 @@ public class Archer extends Unit {
 		if (neighbours.size() != 0)
 			return neighbours;
 		
-		Hero enemy = this.hero == Game.player ? Game.ai : Game.player;
+		Hero enemy = this.hero.getEnemy();
 		return enemy.getAliveUnits();
 	}
 }

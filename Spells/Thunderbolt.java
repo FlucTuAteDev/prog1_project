@@ -1,7 +1,6 @@
 package Spells;
 
 import Base.Game;
-import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
 import Utils.ThreadHelper;
@@ -20,7 +19,7 @@ public class Thunderbolt extends Spell {
 			return;
 
 		Menu<Unit> menu = new BasicMenu<>("Támadható egységek: ", Game.menuView);
-		Hero enemy = this.hero == Game.player ? Game.ai : Game.player;
+		Hero enemy = this.hero.getEnemy();
 		for (Unit unit : enemy.getAliveUnits()) {
 			menu.addItem(new MenuItem<>(unit, null,
 				Colors.textFromBg(enemy.COLOR), 

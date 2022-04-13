@@ -2,7 +2,6 @@ package Base;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
@@ -10,6 +9,7 @@ import Base.Console.Alignment;
 import Board.Board;
 import Board.Tile;
 import Hero.Hero;
+import Hero.AI;
 import Hero.Skill;
 import Menu.*;
 import Menu.Items.HeaderItem;
@@ -20,28 +20,31 @@ import View.View;
 import View.Colors.*;
 
 public class Game {
-	public static View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT - 1);
-	public static View actionView = new View(Board.HEIGHT + 2, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
-	public static View menuView = new View(actionView.top + 1, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
-	public static View inputView = new View(Console.HEIGHT - 1, 1, Console.WIDTH / 2, 1);
+	public static final View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT - 1);
+	public static final View actionView = new View(Board.HEIGHT + 2, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
+	public static final View menuView = new View(actionView.top + 1, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
+	public static final View inputView = new View(Console.HEIGHT - 1, 1, Console.WIDTH / 2, 1);
 
-	public static View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
-	public static View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
-	public static Hero player = new Hero("Játékos", Colors.DARK_BLUE, playerView);
-	public static Hero ai = new Hero("Kompútor", Colors.DARK_GREEN, aiView); // TODO: AI
-	public static Board	board = new Board(player, ai);
+	public static final View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
+	public static final View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
+	public static final Hero user = new Hero("Játékos", Colors.DARK_BLUE, playerView);
+	public static final Hero ai = new AI("Kompútor", Colors.DARK_GREEN, aiView); // TODO: AI
+
+	public static Board	board = new Board(user, ai);
 	public static List<Unit> units = new ArrayList<>();
 
 	public Game() {
-		player.addUnit(new Farmer(player));
-		player.addUnit(new Archer(player));
-		player.addUnit(new Griff(player));
+		user.addUnit(new Farmer(user));
+		user.addUnit(new Archer(user));
+		user.addUnit(new Griff(user));
+		user.setEnemy(ai);
 
 		ai.addUnit(new Farmer(ai));
 		ai.addUnit(new Archer(ai));
 		ai.addUnit(new Griff(ai));
+		ai.setEnemy(user);
 
-		units.addAll(player.getUnits());
+		units.addAll(user.getUnits());
 		units.addAll(ai.getUnits());
 	}
 
@@ -52,7 +55,7 @@ public class Game {
 		Menu<Unit> unitMenu = new InitMenu<>("Egységek", initView);
 		Menu<Spell> spellMenu = new InitMenu<>("Varázslatok", initView);
 
-		HeaderItem moneyHeader = new HeaderItem("💰(Pénz): %s", player::getMoney);
+		HeaderItem moneyHeader = new HeaderItem("💰(Pénz): %s", user::getMoney);
 		HeaderItem spacer = new HeaderItem("");
 
 		// Difficulity
@@ -63,7 +66,7 @@ public class Game {
 		);
 		for (var item : difficulityItems) {
 			difficultyMenu.addItem(new MenuItem<>((int)item.get(0), mainMenu, (RGB)item.get(2), 
-				player::setMoney, 
+				user::setMoney, 
 				"%-10s (%4s arany)", v -> item.get(1), v -> v));
 		}
 
@@ -91,8 +94,8 @@ public class Game {
 
 		// Skills
 		skillMenu.addHeader(moneyHeader);
-		skillMenu.addHeader(new HeaderItem("💲(Ár): %s", player::getSkillPrice));
-		for (var s : player.getSkills()) {
+		skillMenu.addHeader(new HeaderItem("💲(Ár): %s", user::getSkillPrice));
+		for (var s : user.getSkills()) {
 			Skill skill = s.getValue();
 
 			skillMenu.addItem(new MenuItem<Skill>(skill, skillMenu,
@@ -105,12 +108,12 @@ public class Game {
 		spellMenu.addHeader(spacer);
 		spellMenu.addHeader(new HeaderItem(Colors.GRAY, "💲: Ár"));
 		spellMenu.addHeader(new HeaderItem(Colors.GRAY, "💪: Manna"));
-		for (var s : player.getSpells()) {
+		for (var s : user.getSpells()) {
 			Spell spell = s.getValue();
 			spellMenu.addItem(new MenuItem<>(spell, spellMenu,
 					v -> {
 						int spellPrice = v.price;
-						if (v.isActive() || !player.takeMoney(spellPrice))
+						if (v.isActive() || !user.takeMoney(spellPrice))
 							return;
 
 						v.setActive();
@@ -129,16 +132,16 @@ public class Game {
 		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "❤: Életérő"));
 		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🚀: Sebesség"));
 		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🙌: Kezdeményezés"));
-		for (Unit unit : player.getUnits()) {
+		for (Unit unit : user.getUnits()) {
 			unitMenu.addItem(new MenuItem<>(unit, unitMenu,
 					v -> {
-						int maxAmount = player.getMoney() / v.price;
+						int maxAmount = user.getMoney() / v.price;
 						if (maxAmount == 0)
 							return; // TODO: error message
 
 						int amount = Console.scanInt("Darab", 0, maxAmount);
 						v.setMaxCount(v.getMaxCount() + amount);
-						player.takeMoney(amount * v.price);
+						user.takeMoney(amount * v.price);
 					},
 					"%-15s (💲: %2s, ⚔: %2s - %2s, ❤: %2s, 🚀: %2s, 🙌: %2s, %3s db)",
 					v -> v.name, v -> v.price, v -> v.minDamage, v -> v.maxDamage, v -> v.baseHealth, v -> v.speed,
@@ -153,7 +156,7 @@ public class Game {
 	private void placeUnits() {
 		board.draw();
 		// Asks the user where to draw each unit
-		for (Unit unit : player.getUnits()) {
+		for (Unit unit : user.getUnits()) {
 			// DEBUG ONLY COMMENT
 			// if (unit.getCount().get() == 0) continue;
 
@@ -182,13 +185,13 @@ public class Game {
 		board.draw();
 		Random rand = new Random();
 		
-		player.setMoney(9999);
-		player.getSpellValues().forEach(x -> x.setActive());
-		player.getSkill("magic").addPoints(9);
-		player.getSkill("intelligence").addPoints(9);
-		player.getSkill("moral").addPoints(9);
+		user.setMoney(9999);
+		user.getSpellValues().forEach(x -> x.setActive());
+		user.getSkill("magic").addPoints(9);
+		user.getSkill("intelligence").addPoints(9);
+		user.getSkill("moral").addPoints(9);
 
-		for (Unit unit : player.getUnits()) {
+		for (Unit unit : user.getUnits()) {
 			int row, col;
 			unit.setMaxCount(50);
 			do {
@@ -210,35 +213,27 @@ public class Game {
 	}
 
 	private void update() {
-		Menu<Object> actionMenu = new BasicMenu<>("Lehetőségek:", menuView);
-		Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
-		Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek:", menuView);
-		Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek:", menuView);
-
 		// Sort the units by initiative
 		Collections.sort(units);
 		int round = 0;
 		while (true) {
-			player.usedAbility = false;
+			user.usedAbility = false;
 			ai.usedAbility = false; 
 
 			for (Unit unit : units) {
-				if (unit.isDead()) continue;
-				
 				Hero hero = unit.hero;
-				Hero enemy = unit.hero == player ? ai : player;
-
 				// Endscreen
-				if (hero.getAliveUnits().size() == 0 || enemy.getAliveUnits().size() == 0) return;
+				if (hero.getAliveUnits().size() == 0 || hero.getEnemy().getAliveUnits().size() == 0) return;
 
-				player.draw();
-				ai.draw();
+				if (unit.isDead()) continue;
 				unit.select();
+
+				user.draw();
+				ai.draw();
 				
+				// Draw round order
 				actionView.clear();
 				Console.print("%d. kör. Sorrend: ", round + 1);
-
-				// Draw round order
 				for (int i = 0; i < units.size(); i++) {
 					Unit next = units.get(i);
 					if (next.isDead()) continue;
@@ -246,75 +241,13 @@ public class Game {
 					if (next == unit) Colors.setBgWithFg(Colors.brighten(next.hero.COLOR, .5));
 					else next.hero.setColors();
 
-					Console.print(" %s ", next.icon);
+					Console.print("%s", next);
 					Console.resetStyles();
 				}	
 
-				// Unit attacks
-				for (Unit attackableUnit : unit.attackableUnits()) {
-					unitAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
-							Colors.textFromBg(attackableUnit.hero.COLOR),
-							attackableUnit.hero.COLOR,
-							v -> unit.attack(v),
-							"%s", v -> v.icon));
-				}
-				unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-				
-				var usableSpells = hero.getActiveSpells().stream().filter(x -> x.manna <= hero.getManna()).toList();
-				if (!hero.usedAbility) {
-					// Hero attacks
-					for (Unit attackableUnit : enemy.getAliveUnits()) {
-						heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
-							Colors.textFromBg(enemy.COLOR), 
-							enemy.COLOR, 
-							v -> {
-								hero.attack(v);
-								hero.usedAbility = true;
-							}, "%s", v -> v.icon));
-					}
-					heroAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-					
-					// Hero spells
-					for (Spell spell : usableSpells) {
-						spellMenu.addItem(new MenuItem<>(spell, null,
-						v -> {
-							v.cast();
-							hero.usedAbility = true;
-						}, 
-						"%s - %s", v -> v.icon, v -> v.name));
-					}
-					spellMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-				}
-				
-				// Actions
-				actionMenu.addItem(new MenuItem<>(null, null,
-					v -> {
-						Console.scanTile(
-							x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null,
-							x -> !unit.move(x) ? "Az egység nem tud a megadott cellára lépni!" : null
-						);
-				}, "Egység -> Mozgás"));
-				actionMenu.addItem(new MenuItem<>(null, null, v -> {}, "Egység -> Várakozás"));
+				hero.takeTurn(unit);
 
-				if (unit.attackableUnits().size() != 0)
-					actionMenu.addItem(new MenuItem<>(null, unitAttackableMenu, v -> {}, "Egység -> Támadás"));
-
-				if (!hero.usedAbility) {
-					if (enemy.getAliveUnits().size() != 0)
-						actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
-					
-					if (usableSpells.size() != 0)
-						actionMenu.addItem(new MenuItem<>(null, spellMenu, v -> {}, "Hős -> Varázslás"));
-				}
-
-				actionMenu.display();
-
-				actionMenu.clearItems();
-				unitAttackableMenu.clearItems();
-				heroAttackableMenu.clearItems();
-				spellMenu.clearItems();
-
-				unit.deselect();	
+				unit.deselect();
 			}
 
 			// Enable all counter attacks
@@ -325,7 +258,7 @@ public class Game {
 	}
 
 	public void endScreen() {
-		boolean playerDead = player.getAliveUnits().size() == 0;
+		boolean playerDead = user.getAliveUnits().size() == 0;
 		boolean aiDead = ai.getAliveUnits().size() == 0;
 
 		Console.clearScreen();
@@ -333,9 +266,9 @@ public class Game {
 		if (playerDead && aiDead)
 			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "Döntetlen - a felek kiegyenlítettek voltak.");
 		else if (playerDead)
-			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a jobb oldal!", Game.ai);
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a jobb oldal!", ai);
 		else if (aiDead)
-			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a bal oldal!", Game.player);
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a bal oldal!", user);
 	}
 
 	public void run() {
