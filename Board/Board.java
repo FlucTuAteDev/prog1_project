@@ -2,7 +2,7 @@ package Board;
 
 import Base.Console;
 import Hero.Hero;
-import Units.*;
+import Utils.Vector;
 import View.Drawable;
 import View.View;
 
@@ -46,6 +46,10 @@ public class Board implements Drawable {
 
 	public Tile getTile(int row, int col) {
 		return board[row][col];
+	}
+
+	public Tile getTile(Vector pos) {
+		return board[pos.row][pos.col];
 	}
 
 	@Override

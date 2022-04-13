@@ -7,6 +7,7 @@ import java.util.Set;
 import Base.Console;
 import Base.Console.Alignment;
 import Units.Unit;
+import Utils.Vector;
 import View.Colors.*;
 import View.Drawable;
 import View.View;
@@ -21,6 +22,7 @@ public class Tile implements Drawable {
 	public final int row;
 	public final int col;
 	public final View view;
+	public final Vector position;
 	private Unit unit;
 	private Set<Tile> neighbours;
 	private String spacer =  " ".repeat(COLS);
@@ -28,6 +30,7 @@ public class Tile implements Drawable {
 	public Tile(int row, int col, View view) {
 		this.row = row;
 		this.col = col;
+		this.position = new Vector(row, col);
 		this.view = view;
 		this.neighbours = new HashSet<>();
 	}
@@ -63,6 +66,7 @@ public class Tile implements Drawable {
 		Unit old = this.unit;
 		this.unit = unit;
 
+
 		if (old != null)
 			old.setTile(null);
 		
@@ -81,6 +85,10 @@ public class Tile implements Drawable {
 
 	public static int distance(Tile a, Tile b) {
 		return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
+	}
+
+	public static Vector direction(Tile a, Tile b) {
+		return new Vector(a.row - b.row, a.col - b.col);
 	}
 
 	public void draw(String... rows) {

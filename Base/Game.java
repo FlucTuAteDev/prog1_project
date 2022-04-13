@@ -189,7 +189,7 @@ public class Game {
 		user.getSpellValues().forEach(x -> x.setActive());
 		user.getSkill("magic").addPoints(9);
 		user.getSkill("intelligence").addPoints(9);
-		user.getSkill("moral").addPoints(9);
+		// user.getSkill("moral").addPoints(9);
 
 		for (Unit unit : user.getUnits()) {
 			int row, col;

@@ -7,7 +7,7 @@ import java.util.function.Function;
 import Board.Board;
 import Board.Tile;
 import Utils.Maths;
-import Utils.Position;
+import Utils.Vector;
 import Utils.Functions.ConverterFunction;
 import View.View;
 import View.Colors.RGB;
@@ -29,8 +29,8 @@ public class Console {
 
 	public static final int WIDTH = 120;
 	public static final int HEIGHT = 30;
-	private static Position savedPosition = new Position(0, 0);
-	private static Position currentPosition = new Position(0, 0);
+	private static Vector savedPosition = new Vector(0, 0);
+	private static Vector currentPosition = new Vector(0, 0);
 
 	public static enum Alignment {
 		LEFT, CENTER, RIGHT
@@ -97,18 +97,18 @@ public class Console {
 		LEFT("D", 0, -1);
 
 		private String ansiDir;
-		private Position dir;
+		private Vector dir;
 
 		MoveDirection(String ansiDir, int row, int col) {
 			this.ansiDir = ansiDir;
-			this.dir = new Position(row, col);
+			this.dir = new Vector(row, col);
 		}
 
 		public String getChar() {
 			return ansiDir;
 		}
 
-		public Position getDirection() {
+		public Vector getDirection() {
 			return dir;
 		}
 	}
@@ -124,7 +124,7 @@ public class Console {
 		currentPosition.col = col;
 	}
 
-	public static void setCursorPosition(Position pos) {
+	public static void setCursorPosition(Vector pos) {
 		setCursorPosition(pos.row, pos.col);
 	}
 
@@ -134,7 +134,7 @@ public class Console {
 		print(ANSI.ESC + "[" + amount + direction.getChar());
 
 		// curr += dir * amt. Operator overloading... 🙄
-		currentPosition.add(Position.multiply(direction.getDirection(), amount));
+		currentPosition = currentPosition.add(direction.getDirection().times(amount));
 	}
 
 	public static void saveCursor() {

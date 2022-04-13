@@ -1,8 +1,9 @@
 package Hero;
 
+import Base.Game;
 import Board.Tile;
 import Units.Unit;
-import Utils.Position;
+import Utils.Vector;
 import View.View;
 import View.Colors.RGB;
 
@@ -21,11 +22,25 @@ public class AI extends Hero {
 			unit.attack(target);
 		} else {
 			// Move towards lowest hp
-			Unit lowestHp = hero.getEnemy().getUnits().stream().min((a, b) -> a.getHealth() - b.getHealth()).get();
+			Unit target = hero.getEnemy().getAliveUnits().stream().min((a, b) -> a.getHealth() - b.getHealth()).get();
 			
-			int distance = Tile.distance(unit.getTile(), lowestHp.getTile());
-			if (distance <= unit.speed) {
-				
+			Vector direction = Tile.direction(target.getTile(), unit.getTile());
+			Vector step = new Vector(
+				(int)Math.signum(direction.row) * Math.min(Math.abs(direction.row), unit.speed),
+				(int)Math.signum(direction.col) * Math.min(Math.abs(direction.col), unit.speed)
+			);
+
+			// If the target unit is outside the range of the current unit then
+			// step to the closest cell to the unit that it can reach
+			int dist = Tile.distance(unit.getTile(), target.getTile());
+			if (dist > unit.speed) {
+				Tile dest = Game.board.getTile(step.add(unit.getTile().position));
+				unit.move(dest);
+			// Otherwise move to the nearest spot that isn't the target unit
+			} else {
+				Vector inverse = direction.inverse();
+				Tile dest = Game.board.getTile(target.getTile().position.add(new Vector((int)Math.signum(inverse.row), (int)Math.signum(inverse.col))));
+				unit.move(dest);
 			}
 		}
 	}

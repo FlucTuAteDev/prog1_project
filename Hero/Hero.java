@@ -1,3 +1,4 @@
+
 package Hero;
 
 import java.util.ArrayList;
@@ -43,7 +44,7 @@ public class Hero implements Drawable {
 	private Hero enemy;
 
 	public Hero(String name, RGB color, View view) {
-		this.name = name;
+		this.name = name; 
 		this.COLOR = color;
 		this.TEXT_COLOR = Colors.textFromBg(color);
 		this.view = view;

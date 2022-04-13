@@ -6,13 +6,10 @@ import java.util.Random;
 
 import Base.Console;
 import Base.Game;
-import Base.Console.Alignment;
 import Board.Tile;
 import Hero.Hero;
-import Spells.Spell;
 import View.Drawable;
 import View.Colors.Colors;
-import View.Colors.RGB;
 
 public abstract class Unit implements Comparable<Unit>, Drawable {
 	public final String name;
