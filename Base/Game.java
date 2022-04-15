@@ -75,9 +75,9 @@ public class Game {
 			player2.usedAbility = false; 
 
 			for (Unit unit : units) {
-				Hero hero = unit.hero;
 				if (unit.isDead()) continue;
-
+				
+				Hero hero = unit.hero;
 				while (!hero.usedUnit) {
 					// Endscreen
 					if (hero.getAliveUnits().size() == 0 || hero.getEnemy().getAliveUnits().size() == 0) return;

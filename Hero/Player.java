@@ -173,7 +173,7 @@ public class Player extends Hero {
 		if (!usedAbility) {
 			// Hero attacks
 			for (Unit attackableUnit : enemy.getAliveUnits()) {
-				heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, actionMenu,
+				heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
 					Colors.textFromBg(enemy.COLOR), 
 					enemy.COLOR, 
 					v -> {
