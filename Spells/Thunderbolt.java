@@ -3,7 +3,6 @@ package Spells;
 import Base.Game;
 import Hero.Hero;
 import Units.Unit;
-import Utils.ThreadHelper;
 import View.Colors.Colors;
 import Menu.*;
 import Menu.Items.MenuItem;
@@ -28,10 +27,14 @@ public class Thunderbolt extends Spell {
 		}
 
 		Unit selectedUnit = menu.display();
-		this.effect(selectedUnit.getTile());
-		
-		ThreadHelper.sleep(Spell.EFFECT_TIME);
+		int damage = (int)Math.round(this.getValue());
 
-		this.use(selectedUnit);
+		Hero hero = this.hero;
+		Game.logMessage("%s %s %s: -%d❤ -> -%ddb", 
+			hero, this.icon, selectedUnit,
+			damage, damage / selectedUnit.baseHealth);
+
+		selectedUnit.getTile().effect(Colors.RED, this.icon);
+		selectedUnit.takeDamage(damage);
 	}
 }

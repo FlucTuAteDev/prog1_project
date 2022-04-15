@@ -5,10 +5,10 @@ import java.util.Arrays;
 import java.util.List;
 
 import Base.Console;
+import Base.Game;
 import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
-import Utils.ThreadHelper;
 import View.Colors.Colors;
 
 public class Fireball extends Spell {
@@ -29,24 +29,20 @@ public class Fireball extends Spell {
 			// Firendy units take damage as well
 			if (affectedTile.hasUnit()) {
 				Unit unit = affectedTile.getUnit();
-				this.use(unit);
-			}
+				int damage = (int)Math.round(this.getValue());
 
-			this.effect(affectedTile);
+				Hero hero = this.hero;
+				Game.logMessage("%s %s %s: -%d❤ -> -%ddb", 
+					hero, this.icon, unit,
+					damage, damage / unit.baseHealth);
+
+				unit.takeDamage(damage);
+			}
 		}
 
-		ThreadHelper.sleep(Spell.EFFECT_TIME);
+		Tile.effect(affectedTiles, Colors.RED, this.icon);
 		
 		// Restore tiles
 		affectedTiles.forEach(Tile::draw);
-	}
-
-	@Override
-	public void effect(Tile tile) {
-		tile.setCursor();
-		Console.setBackground(Colors.DAMAGE);
-		Console.setForeground(Colors.textFromBg(Colors.DAMAGE));
-		tile.draw(this.icon);
-		Console.resetStyles();
 	}
 }

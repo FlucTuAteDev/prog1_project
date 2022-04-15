@@ -11,32 +11,29 @@ public class Skill {
 
 	public Skill(String name, double multiplier, Hero hero) {
 		this.name = name;
-		this.points = 1;
 		this.multiplier = multiplier;
 		this.hero = hero;
+
+		this.points = 1;
 	}
 
 	public int getPoints() {
 		return points;
 	}
 
-	public boolean addPoints(int amt) {
-		if (amt < 1)
-			return false;
+	public double getValue() {
+		return (Math.abs(multiplier) < 1 ? 1 : 0) + points * multiplier;
+	}
 
-		int res = this.points + amt;
-		if (res > MAX_SKILL)
+	public boolean buy() {
+		if (this.points + 1 > MAX_SKILL)
 			return false;
 
 		if (!this.hero.takeMoney(this.hero.getSkillPrice()))
 			return false;
 
-		this.points = res;
+		this.points++;
 		this.hero.incrementSkillPrice();
 		return true;
-	}
-
-	public double getValue() {
-		return (Math.abs(multiplier) < 1 ? 1 : 0) + points * multiplier;
 	}
 }

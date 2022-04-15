@@ -1,11 +1,6 @@
 package Spells;
 
-import Base.Console;
-import Base.Game;
-import Board.Tile;
 import Hero.Hero;
-import Units.Unit;
-import View.Colors.Colors;
 import View.Colors.RGB;
 
 public abstract class Spell {
@@ -18,7 +13,6 @@ public abstract class Spell {
 	public final Hero hero;
 
 	private boolean active = false;
-	protected static final int EFFECT_TIME = 1000;
 
 	public Spell(String name, String icon, RGB color, int price, int manna, int multiplier, Hero hero) {
 		this.name = name;
@@ -45,24 +39,13 @@ public abstract class Spell {
 		return multiplier * hero.getSkill("magic").getValue();
 	}
 
-	public void use(Unit unit) {
-		int damage = (int)Math.round(this.getValue());
+	public boolean buy() {
+		if (this.isActive() || !this.hero.takeMoney(this.price))
+			return false;
 
-		Hero hero = this.hero;
-		Game.logMessage("%s %s %s: -%d❤ -> -%ddb", 
-			hero, this.icon, unit,
-			damage, damage / unit.baseHealth);
-
-		unit.takeDamage(damage);
+		this.setActive();
+		return true;
 	}
 
 	public abstract void cast();
-
-	public void effect(Tile tile) {
-		tile.setCursor();
-		Console.setBackground(this.color);
-		Console.setForeground(Colors.textFromBg(this.color));
-		tile.draw(this.icon);
-		Console.resetStyles();
-	}
 }

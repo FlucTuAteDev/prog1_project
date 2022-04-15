@@ -1,5 +1,6 @@
 package Units;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -8,7 +9,8 @@ import Base.Console;
 import Base.Game;
 import Board.Tile;
 import Hero.Hero;
-import View.Drawable;
+import Interfaces.Drawable;
+import Utils.ThreadHelper;
 import View.Colors.Colors;
 
 public abstract class Unit implements Comparable<Unit>, Drawable {
@@ -50,26 +52,39 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		this.health = 0;
 	}
 
-	public boolean canMoveTo(Tile tile) {
-		return Tile.distance(this.tile, tile) <= speed;
+	public boolean canMoveOn(List<Tile> path) {
+		return path.size() <= speed;
 	}
-	public boolean move(Tile tile) {
-		if (tile.hasUnit() || !canMoveTo(tile))
-			return false;
+	public boolean move(List<Tile> path) {
+		if (!canMoveOn(path)) return false;
+
+		Tile start = this.tile;
+		for (Tile tile : path) {
+			if (tile.hasUnit())
+				throw new IllegalStateException("There can't be a unit tile in the path");
+
+			this.tile.setUnit(null);
+			setTile(tile);
+			ThreadHelper.sleep(Game.Constants.MOVE_TIME);
+		}
 
 		Game.logMessage("%s elmozgott: %s -> %s",
 			this,
-			this.tile, tile);
-
-		this.tile.setUnit(null);
-		setTile(tile);
+			start, this.tile);
+		 
 		return true;
+	}
+	public boolean move(Tile tile) {
+		if (tile.hasUnit() || Tile.distance(this.tile, tile) > this.speed) 
+			return false;
+
+		List<Tile> path = Game.board.findPath(this.tile, tile);
+		return move(path);
 	}
 
 	public void heal(double amt) {
 		this.health = Math.min(this.health + (int)Math.round(amt), this.maxCount * this.baseHealth);
 		this.count = (int)Math.ceil(this.health / this.baseHealth);
-		draw();
 	}
 
 	public void takeDamage(int amt) {
@@ -82,8 +97,8 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		} else {
 			this.health = res;
 			this.count = (int)Math.ceil((double)this.health / this.baseHealth);
-			draw();
 		}
+		draw();
 	}
 	public double getDamage(Unit defender) {
 		double res = 0;
@@ -103,12 +118,14 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		boolean crit = random.nextInt(0, (int) (1 / luck)) == 0;
 		int damage = (int)Math.round(this.getDamage(other) * (crit ? 2 : 1));
 
-		Game.logMessage("%s ⚔ %s: %s-%d❤ -> -%ddb", 
+		Game.logMessage("%s ⚔ %s:%s-%d❤ -> -%ddb", 
 			this, other,
-			crit ? "KRITIKUS " : "",
+			crit ? " KRITIKUS " : " ",
 			damage, damage / other.baseHealth);
 
+		other.getTile().effect(Colors.RED);
 		other.takeDamage(damage);
+		
 		other.counterAttack(this);
 	}
 	public void counterAttack(Unit other) {
@@ -118,12 +135,13 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 
 		int damage = (int)Math.round(this.getDamage(other) / 2);
 
-		Game.logMessage("%s visszatámad %s-re: -%d❤️ -> -%ddb",
+		Game.logMessage("%s ↩⚔ %s: -%d❤ -> -%ddb",
 			this, other,
 			damage, damage / this.baseHealth);
 
+		other.getTile().effect(Colors.RED);
 		other.takeDamage(damage);
-		
+
 		canCounter = false;
 	}
 	public void enableCounter() {
@@ -214,6 +232,14 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 
 		this.tile.draw(this.icon, String.valueOf(this.getCount()));
 		Console.resetStyles();
+	}
+
+	public boolean buy(int amount) {
+		int maxAmount = this.hero.getMoney() / this.price;
+
+		if (amount > maxAmount) return false;
+		this.setMaxCount(this.maxCount + amount);
+		return this.hero.takeMoney(amount * this.price);
 	}
 
 	@Override

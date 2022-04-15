@@ -7,41 +7,39 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import Base.Console;
-import Base.Game;
 import Base.Console.Alignment;
-import Menu.Menu;
-import Menu.Items.MenuItem;
-import Menu.BasicMenu;
+import Interfaces.Drawable;
+import Base.Game;
+
 import Spells.Fireball;
 import Spells.Resurrection;
 import Spells.Spell;
 import Spells.Thunderbolt;
-import Units.*;
-import View.Drawable;
+import Units.Unit;
 import View.View;
 import View.Colors.Colors;
 import View.Colors.RGB;
 
-public class Hero implements Drawable {
+public abstract class Hero implements Drawable {
 	public final RGB COLOR;
 	public final RGB TEXT_COLOR;
 	public final View view;
 	public final String name;
 
 	public boolean usedAbility = false;
-
-	private Map<String, Skill> skills = new LinkedHashMap<>();
-	private Map<String, Spell> spells = new LinkedHashMap<>();
-	private List<Unit> units = new ArrayList<>();
-	private int skillPrice = 5;
-	private int usedManna = 0;
-	private int money;
-
-	private Hero enemy;
+	public boolean usedUnit = false;
+	
+	protected Map<String, Skill> skills = new LinkedHashMap<>();
+	protected Map<String, Spell> spells = new LinkedHashMap<>();
+	protected List<Unit> units = new ArrayList<>();
+	protected Hero enemy;
+	protected int skillPrice = 5;
+	protected int usedManna = 0;
+	protected int money;
 
 	public Hero(String name, RGB color, View view) {
 		this.name = name; 
@@ -68,6 +66,7 @@ public class Hero implements Drawable {
 			this, unit,
 			damage, damage / unit.baseHealth);
 
+		unit.getTile().effect(Colors.RED, "hős");
 		unit.takeDamage(damage);
 	}
 
@@ -110,6 +109,10 @@ public class Hero implements Drawable {
 	public List<Unit> getAliveUnits() {
 		return units.stream().filter(x -> !x.isDead()).toList();
 	}
+	public List<Unit> getEnemyUnits() {
+		return enemy.units.stream().filter(x -> !x.isDead()).toList();
+	}
+	
 	public void addUnit(Unit unit) {
 		this.units.add(unit);
 		Collections.sort(this.units);
@@ -138,11 +141,6 @@ public class Hero implements Drawable {
 		draw();
 		Console.restoreCursor();
 		return true;
-	}
-
-	public void setColors() {
-		Console.setBackground(this.COLOR);
-		Console.setForeground(this.TEXT_COLOR);
 	}
 
 	public void setEnemy(Hero enemy) {
@@ -187,81 +185,9 @@ public class Hero implements Drawable {
 		return Colors.wrapWithColor(" " + this.name + " ", COLOR, TEXT_COLOR);
 	}
 
-	Menu<Object> actionMenu = new BasicMenu<>("Lehetőségek:", Game.menuView);
-	Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek:", Game.menuView);
-	Menu<Unit> heroAttackableMenu = new BasicMenu<>("Megtámadható egységek:", Game.menuView);
-	Menu<Spell> spellMenu = new BasicMenu<>("Választható spellek:", Game.menuView);
-	public void takeTurn(Unit unit) {
-		if (!this.units.contains(unit))
-			throw new RuntimeException("Can't take turn with another hero's unit");
-
-		// Unit attacks
-		for (Unit attackableUnit : unit.attackableUnits()) {
-			unitAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
-					Colors.textFromBg(attackableUnit.hero.COLOR),
-					attackableUnit.hero.COLOR,
-					v -> unit.attack(v),
-					"%s", v -> v.icon));
-		}
-		unitAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-		
-		var usableSpells = getActiveSpells().stream().filter(x -> x.manna <= getManna()).toList();
-		if (!usedAbility) {
-			// Hero attacks
-			for (Unit attackableUnit : enemy.getAliveUnits()) {
-				heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
-					Colors.textFromBg(enemy.COLOR), 
-					enemy.COLOR, 
-					v -> {
-						attack(v);
-						usedAbility = true;
-					}, "%s", v -> v.icon));
-			}
-			heroAttackableMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-			
-			// Hero spells
-			for (Spell spell : usableSpells) {
-				spellMenu.addItem(new MenuItem<>(spell, null,
-				v -> {
-					v.cast();
-					usedAbility = true;
-				}, 
-				"%s - %s", v -> v.icon, v -> v.name));
-			}
-			spellMenu.addItem(new MenuItem<>(null, actionMenu, Colors.RED, v -> {}, "Vissza"));
-		}
-		
-		// Actions
-		actionMenu.addItem(new MenuItem<>(null, null,
-			v -> {
-				Console.scanTile(
-					x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null,
-					x -> !unit.move(x) ? "Az egység nem tud a megadott cellára lépni!" : null
-				);
-		}, "Egység -> Mozgás"));
-		actionMenu.addItem(new MenuItem<>(null, null, v -> {}, "Egység -> Várakozás"));
-
-		if (unit.attackableUnits().size() != 0)
-			actionMenu.addItem(new MenuItem<>(null, unitAttackableMenu, v -> {}, "Egység -> Támadás"));
-
-		if (!usedAbility) {
-			if (enemy.getAliveUnits().size() != 0)
-				actionMenu.addItem(new MenuItem<>(null, heroAttackableMenu, v -> {}, "Hős -> Támadás"));
-			
-			if (usableSpells.size() != 0)
-				actionMenu.addItem(new MenuItem<>(null, spellMenu, v -> {}, "Hős -> Varázslás"));
-		}
-
-		actionMenu.display();
-
-		actionMenu.clearItems();
-		unitAttackableMenu.clearItems();
-		heroAttackableMenu.clearItems();
-		spellMenu.clearItems();
-	}
-
-	// public Unit[] getUnitsFrom(Collection<Unit> units) {
-	// 	return units.stream().filter(x -> x.hero == this).toArray(Unit[]::new);
-	// }
+	
+	public abstract void init();
+	public abstract void placeUnits();
+	public abstract void takeTurn(Unit unit);
 
 }

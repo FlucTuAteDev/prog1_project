@@ -1,15 +1,19 @@
 package Board;
 
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
 import Base.Console;
+import Base.Game;
 import Base.Console.Alignment;
+import Interfaces.Drawable;
 import Units.Unit;
+import Utils.ThreadHelper;
 import Utils.Vector;
 import View.Colors.*;
-import View.Drawable;
 import View.View;
 
 public class Tile implements Drawable {
@@ -87,10 +91,29 @@ public class Tile implements Drawable {
 		return Math.max(Math.abs(a.row - b.row), Math.abs(a.col - b.col));
 	}
 
+	public static double euclideanDistance(Tile a, Tile b) {
+		return Math.sqrt(Math.pow(a.row - b.row, 2) + Math.pow(a.col - b.col, 2));
+	}
+
 	public static Vector direction(Tile a, Tile b) {
 		return new Vector(a.row - b.row, a.col - b.col);
 	}
 
+	public static void effect(Collection<Tile> tiles, RGB color, String... rows) {
+		Colors.setBgWithFg(color);
+		for (Tile tile : tiles)
+			tile.draw(rows);
+		Console.resetStyles();
+
+		ThreadHelper.sleep(Game.Constants.EFFECT_TIME);
+		for (Tile tile : tiles)
+			tile.draw();
+	}
+
+	public void effect(RGB color, String... rows) {
+		Tile.effect(List.of(this), color, rows);
+	}
+	
 	public void draw(String... rows) {
 		if (rows.length > ROWS)
 			return;

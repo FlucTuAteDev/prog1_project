@@ -9,4 +9,11 @@ public class RandomHelper {
 	public static <T> T getRandomElement(List<T> list) {
 		return list.get(random.nextInt(list.size()));
 	}
+
+	public static int getInt(int end) {
+		return getInt(0, end);
+	}
+	public static int getInt(int start, int end) {
+		return random.nextInt(start, end);
+	}
 }

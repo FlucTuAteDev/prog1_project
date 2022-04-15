@@ -7,191 +7,62 @@ import java.util.Random;
 
 import Base.Console.Alignment;
 import Board.Board;
-import Board.Tile;
 import Hero.Hero;
 import Hero.AI;
-import Hero.Skill;
-import Menu.*;
-import Menu.Items.HeaderItem;
-import Menu.Items.MenuItem;
-import Spells.Spell;
+import Hero.Player;
 import Units.*;
+import Utils.ThreadHelper;
 import View.View;
 import View.Colors.*;
 
 public class Game {
-	public static final View initView = new View(1, 1, Console.WIDTH, Console.HEIGHT - 1);
 	public static final View actionView = new View(Board.HEIGHT + 2, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
 	public static final View menuView = new View(actionView.top + 1, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
 	public static final View inputView = new View(Console.HEIGHT - 1, 1, Console.WIDTH / 2, 1);
 
-	public static final View playerView = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
-	public static final View aiView = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
-	public static final Hero user = new Hero("Játékos", Colors.DARK_BLUE, playerView);
-	public static final Hero ai = new AI("Kompútor", Colors.DARK_GREEN, aiView); // TODO: AI
+	public static final View player1View = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
+	public static final View player2View = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
+	public static final Hero player1 = new Player("Játékos", Colors.DARK_BLUE, player1View);
+	public static final Hero player2 = new AI("Kompútor", Colors.DARK_GREEN, player2View);
 
-	public static Board	board = new Board(user, ai);
+	public static Board	board = new Board(player1, player2);
 	public static List<Unit> units = new ArrayList<>();
 
+	public static class Constants {
+		public static final int EFFECT_TIME = 1000;
+		public static final int MOVE_TIME = 300;
+		public static final int AI_MONEY = 1000;
+		public static final int TURN_DELAY = 1000;
+	}
+
 	public Game() {
-		user.addUnit(new Farmer(user));
-		user.addUnit(new Archer(user));
-		user.addUnit(new Griff(user));
-		user.setEnemy(ai);
+		player1.addUnit(new Farmer(player1));
+		player1.addUnit(new Archer(player1));
+		player1.addUnit(new Griff(player1));
+		player1.setEnemy(player2);
 
-		ai.addUnit(new Farmer(ai));
-		ai.addUnit(new Archer(ai));
-		ai.addUnit(new Griff(ai));
-		ai.setEnemy(user);
+		player2.addUnit(new Farmer(player2));
+		player2.addUnit(new Archer(player2));
+		player2.addUnit(new Griff(player2));
+		player2.setEnemy(player1);
 
-		units.addAll(user.getUnits());
-		units.addAll(ai.getUnits());
-	}
-
-	private void init() {
-		Menu<Integer> difficultyMenu = new InitMenu<>("Nehézségi szint", initView);
-		Menu<Object> mainMenu = new InitMenu<>("Főmenü", initView);
-		Menu<Skill> skillMenu = new InitMenu<>("Tulajdonságpontok", initView);
-		Menu<Unit> unitMenu = new InitMenu<>("Egységek", initView);
-		Menu<Spell> spellMenu = new InitMenu<>("Varázslatok", initView);
-
-		HeaderItem moneyHeader = new HeaderItem("💰(Pénz): %s", user::getMoney);
-		HeaderItem spacer = new HeaderItem("");
-
-		// Difficulity
-		var difficulityItems = List.of(
-			List.of(1300, "Könnyű", Colors.GREEN),
-			List.of(1000, "Közepes", Colors.YELLOW),
-			List.of(700, "Nehéz", Colors.RED)
-		);
-		for (var item : difficulityItems) {
-			difficultyMenu.addItem(new MenuItem<>((int)item.get(0), mainMenu, (RGB)item.get(2), 
-				user::setMoney, 
-				"%-10s (%4s arany)", v -> item.get(1), v -> v));
-		}
-
-		// Main
-		mainMenu.addHeader(moneyHeader);
-		var mainMenuItems = List.of(
-			List.of("Tulajdonságpontok", skillMenu),
-			List.of("Varázslatok", spellMenu),
-			List.of("Egységek", unitMenu)
-		);
-		for (var item : mainMenuItems) {
-			mainMenu.addItem(new MenuItem<Object>(item.get(0), (Menu<?>)item.get(1),
-				v -> {}, 
-				"%-20s", v -> v));
-		}
-		mainMenu.addItem(new MenuItem<Object>(null, null, Colors.RED,
-				v -> {
-					// If no units were bought
-					if (Game.units.stream().allMatch(x -> x.getCount() == 0)) {
-						logError("Legalább egy egységet vársárolni kell, mielőtt csatába mész!");
-						mainMenu.display();
-					}
-				}, 
-				"Befejezés"));
-
-		// Skills
-		skillMenu.addHeader(moneyHeader);
-		skillMenu.addHeader(new HeaderItem("💲(Ár): %s", user::getSkillPrice));
-		for (var s : user.getSkills()) {
-			Skill skill = s.getValue();
-
-			skillMenu.addItem(new MenuItem<Skill>(skill, skillMenu,
-				v -> v.addPoints(1), "%-15s (%2s/%2s)", v -> v.name, Skill::getPoints, v -> Skill.MAX_SKILL));
-		}
-		skillMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
-
-		// Spells
-		spellMenu.addHeader(moneyHeader);
-		spellMenu.addHeader(spacer);
-		spellMenu.addHeader(new HeaderItem(Colors.GRAY, "💲: Ár"));
-		spellMenu.addHeader(new HeaderItem(Colors.GRAY, "💪: Manna"));
-		for (var s : user.getSpells()) {
-			Spell spell = s.getValue();
-			spellMenu.addItem(new MenuItem<>(spell, spellMenu,
-					v -> {
-						int spellPrice = v.price;
-						if (v.isActive() || !user.takeMoney(spellPrice))
-							return;
-
-						v.setActive();
-					},
-					"%-15s (💲: %3s, 💪: %2s) %s",
-					v -> v.name, v -> v.price, v -> v.manna, v -> v.isActive() ? "✔" : "✖"));
-					
-		}
-		spellMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
-
-		// Units
-		unitMenu.addHeader(moneyHeader);
-		unitMenu.addHeader(spacer);
-		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "💲: Ár"));
-		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "⚔: Sebzés"));
-		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "❤: Életérő"));
-		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🚀: Sebesség"));
-		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🙌: Kezdeményezés"));
-		for (Unit unit : user.getUnits()) {
-			unitMenu.addItem(new MenuItem<>(unit, unitMenu,
-					v -> {
-						int maxAmount = user.getMoney() / v.price;
-						if (maxAmount == 0)
-							return; // TODO: error message
-
-						int amount = Console.scanInt("Darab", 0, maxAmount);
-						v.setMaxCount(v.getMaxCount() + amount);
-						user.takeMoney(amount * v.price);
-					},
-					"%-15s (💲: %2s, ⚔: %2s - %2s, ❤: %2s, 🚀: %2s, 🙌: %2s, %3s db)",
-					v -> v.name, v -> v.price, v -> v.minDamage, v -> v.maxDamage, v -> v.baseHealth, v -> v.speed,
-					v -> v.baseInitiative , Unit::getCount));
-		}
-		unitMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
-
-		Console.clearScreen();
-		difficultyMenu.display();
-	}
-
-	private void placeUnits() {
-		board.draw();
-		// Asks the user where to draw each unit
-		for (Unit unit : user.getUnits()) {
-			// DEBUG ONLY COMMENT
-			// if (unit.getCount().get() == 0) continue;
-
-			actionView.clear();
-			Console.println("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount());
-
-			Tile tile = Console.scanTile(0, Board.ROWS, 0, 2, 
-				x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null);
-
-			unit.setTile(tile);
-		}
-
-		Random rand = new Random();
-		for (Unit unit : ai.getUnits()) {
-			int row, col;
-			unit.setMaxCount(50);
-			do {
-				row = rand.nextInt(Board.ROWS);
-				col = rand.nextInt(Board.COLS - 2, Board.COLS);
-			} while (board.getTile(row, col).hasUnit());
-			unit.setTile(board.getTile(row, col));
-		}
+		units.addAll(player1.getUnits());
+		units.addAll(player2.getUnits());
 	}
 
 	private void placeRandom() {
 		board.draw();
 		Random rand = new Random();
 		
-		user.setMoney(9999);
-		user.getSpellValues().forEach(x -> x.setActive());
-		user.getSkill("magic").addPoints(9);
-		user.getSkill("intelligence").addPoints(9);
+		player1.setMoney(9999);
+		player1.getSpellValues().forEach(x -> x.setActive());
+		for (int i = 0; i < 9; i++) {
+			player1.getSkill("magic").buy();
+			player1.getSkill("intelligence").buy();
+		}
 		// user.getSkill("moral").addPoints(9);
 
-		for (Unit unit : user.getUnits()) {
+		for (Unit unit : player1.getUnits()) {
 			int row, col;
 			unit.setMaxCount(50);
 			do {
@@ -201,9 +72,9 @@ public class Game {
 			unit.setTile(board.getTile(row, col));
 		}
 
-		for (Unit unit : ai.getUnits()) {
+		for (Unit unit : player2.getUnits()) {
 			int row, col;
-			unit.setMaxCount(50);
+			// unit.setMaxCount(50);
 			do {
 				row = rand.nextInt(Board.ROWS);
 				col = rand.nextInt(Board.COLS - 2, Board.COLS);
@@ -217,37 +88,42 @@ public class Game {
 		Collections.sort(units);
 		int round = 0;
 		while (true) {
-			user.usedAbility = false;
-			ai.usedAbility = false; 
+			player1.usedAbility = false;
+			player2.usedAbility = false; 
 
 			for (Unit unit : units) {
 				Hero hero = unit.hero;
-				// Endscreen
-				if (hero.getAliveUnits().size() == 0 || hero.getEnemy().getAliveUnits().size() == 0) return;
-
 				if (unit.isDead()) continue;
-				unit.select();
 
-				user.draw();
-				ai.draw();
-				
-				// Draw round order
-				actionView.clear();
-				Console.print("%d. kör. Sorrend: ", round + 1);
-				for (int i = 0; i < units.size(); i++) {
-					Unit next = units.get(i);
-					if (next.isDead()) continue;
+				while (!hero.usedUnit) {
+					// Endscreen
+					if (hero.getAliveUnits().size() == 0 || hero.getEnemy().getAliveUnits().size() == 0) return;
 
-					if (next == unit) Colors.setBgWithFg(Colors.brighten(next.hero.COLOR, .5));
-					else next.hero.setColors();
+					unit.select();
 
-					Console.print("%s", next);
-					Console.resetStyles();
-				}	
+					player1.draw();
+					player2.draw();
+					
+					// Draw round order
+					actionView.clear();
+					Console.print("%d. kör. Sorrend: ", round + 1);
+					for (int i = 0; i < units.size(); i++) {
+						Unit next = units.get(i);
+						if (next.isDead()) continue;
 
-				hero.takeTurn(unit);
+						if (next == unit) Colors.setBgWithFg(Colors.brighten(next.hero.COLOR, .5));
+						else Colors.setBgWithFg(next.hero.COLOR);
 
-				unit.deselect();
+						Console.print(" %s ", next.icon);
+						Console.resetStyles();
+					}
+
+					hero.takeTurn(unit);
+
+					unit.deselect();
+				}
+
+				hero.usedUnit = false;
 			}
 
 			// Enable all counter attacks
@@ -258,22 +134,23 @@ public class Game {
 	}
 
 	public void endScreen() {
-		boolean playerDead = user.getAliveUnits().size() == 0;
-		boolean aiDead = ai.getAliveUnits().size() == 0;
+		boolean playerDead = player1.getAliveUnits().size() == 0;
+		boolean aiDead = player2.getAliveUnits().size() == 0;
 
 		Console.clearScreen();
 		Console.setCursorPosition(Console.HEIGHT / 2, 0);
 		if (playerDead && aiDead)
 			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "Döntetlen - a felek kiegyenlítettek voltak.");
 		else if (playerDead)
-			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a jobb oldal!", ai);
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a jobb oldal!", player2);
 		else if (aiDead)
-			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a bal oldal!", user);
+			Console.printlnAligned(Alignment.CENTER, Console.WIDTH, "%s nyert - csak a bal oldal!", player1);
 	}
 
 	public void run() {
-		// Console.clearScreen();
-		// this.init();
+		Console.clearScreen();
+		// player1.init();
+		player2.init();
 
 		// this.placeUnits();
 		this.placeRandom();
