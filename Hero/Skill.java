@@ -1,5 +1,7 @@
 package Hero;
 
+import Base.Game;
+
 /**
  * Handles the hero's skill points
  */
@@ -29,11 +31,15 @@ public class Skill {
 	}
 
 	public boolean buy() {
-		if (this.points + 1 > MAX_SKILL)
+		if (this.points + 1 > MAX_SKILL) {
+			Game.logError("Ebből a képességből már nem vehetsz többet!");
 			return false;
+		}
 
-		if (!this.hero.takeMoney(this.hero.getSkillPrice()))
+		if (!this.hero.takeMoney(this.hero.getSkillPrice())) {
+			Game.logError("Nincs elég pénzed több képességre!");
 			return false;
+		}
 
 		this.points++;
 		this.hero.incrementSkillPrice();

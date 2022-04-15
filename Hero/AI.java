@@ -40,6 +40,7 @@ public class AI extends Hero {
 
 			skillBudget -= skillPrice;
 			skills.get(key).buy();
+			Game.clearError();
 		}
 
 		// Buy spells
@@ -49,19 +50,24 @@ public class AI extends Hero {
 				if (spell.price > spellBudget) continue;
 				spellBudget -= spell.price;
 				spell.buy();
+				Game.clearError();
 				bought = true;
 			}
 			if (!bought) break;
 		}
 
-		outer:
+		// Buy units
 		while (true) {
+			boolean bought = false;
 			for (Unit unit : this.units) {
-				if (unit.price > unitBudget) break outer;
+				if (unit.price > unitBudget) continue;
 
 				unitBudget -= unit.price;
 				unit.buy(1);
+				Game.clearError();
+				bought = true;
 			}
+			if (!bought) break;
 		}
 	}
 

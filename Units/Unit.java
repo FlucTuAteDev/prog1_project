@@ -223,7 +223,10 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public boolean buy(int amount) {
 		int maxAmount = this.hero.getMoney() / this.price;
 
-		if (amount > maxAmount) return false;
+		if (amount > maxAmount) {
+			Game.logError("Nem tudsz ennyit venni ebből az egységből!");
+			return false;
+		}
 		this.setMaxCount(this.maxCount + amount);
 		return this.hero.takeMoney(amount * this.price);
 	}

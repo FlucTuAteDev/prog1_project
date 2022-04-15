@@ -1,5 +1,6 @@
 package Spells;
 
+import Base.Game;
 import Board.Tile;
 import Hero.Hero;
 import View.Colors.RGB;
@@ -42,8 +43,14 @@ public abstract class Spell {
 	}
 
 	public boolean buy() {
-		if (this.isActive() || !this.hero.takeMoney(this.price))
+		if (this.isActive()) {
+			Game.logError("Ezt a varázslatot már megvetted!");
 			return false;
+		}
+		if (!this.hero.takeMoney(this.price)) {
+			Game.logError("Nincs pénzed erre a varázslatra!");
+			return false;
+		}
 
 		this.setActive();
 		return true;

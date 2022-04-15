@@ -6,6 +6,9 @@ import Hero.Hero;
 import Units.Unit;
 import View.Colors.Colors;
 
+/**
+ * Defines how the drug spell should behave
+ */
 public class Drug extends Spell {
 	public Drug(Hero hero) {
 		super("Gyógyszer", "💊", "Gyógyítja az összes egységet", Colors.HEAL, 80, 5, 20, hero);

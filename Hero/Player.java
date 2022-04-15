@@ -92,15 +92,7 @@ public class Player extends Hero {
 		spellMenu.addHeader(new HeaderItem(Colors.GRAY, "💪: Manna"));
 		for (Spell spell : this.getSpellValues()) {
 			spellMenu.addItem(new MenuItem<>(spell, spellMenu,
-					v -> {
-						int spellPrice = v.price;
-						if (v.isActive() || !this.takeMoney(spellPrice)) {
-							Game.logError("Ezt a varázslatot már megvetted!");
-							return;
-						}
-
-						v.setActive();
-					},
+					Spell::buy,
 					"%-15s (💲: %3s, 💪: %2s 📜: %-30s) %s",
 					v -> v.name, v -> v.price, v -> v.manna, v -> v.desc, v -> v.isActive() ? "✔" : "✖"));
 		}
