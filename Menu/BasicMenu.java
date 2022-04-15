@@ -13,6 +13,17 @@ public class BasicMenu<T> extends Menu<T> {
 		view.clear();
 		Console.println(this.name);
 
+		if (this.items.size() == 0) return null;
+
+		if (this.items.size() == 1) {
+			MenuItem<T> item = this.items.get(0);
+			item.action.accept(item.value);
+		
+			if (item.next != null)
+				item.next.display();
+				
+			return item.value;
+		}
 		// Display items with indices
 		int i = 0;
 		for (var item : this.items) {

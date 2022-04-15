@@ -4,6 +4,7 @@ package Hero;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,10 @@ public abstract class Hero implements Drawable {
 	public List<Unit> getEnemyUnits() {
 		return enemy.units.stream().filter(x -> !x.isDead()).toList();
 	}
-	
+	public Unit getLowestHpUnit() {
+		return this.getAliveUnits().stream().min(Comparator.comparingInt(Unit::getHealth)).get();
+	}
+
 	public void addUnit(Unit unit) {
 		this.units.add(unit);
 		Collections.sort(this.units);

@@ -1,6 +1,7 @@
 package Spells;
 
 import Base.Game;
+import Board.Tile;
 import Hero.Hero;
 import Units.Unit;
 import View.Colors.Colors;
@@ -11,12 +12,14 @@ public class Thunderbolt extends Spell {
 	public Thunderbolt(Hero hero) {
 		super("Villámcsapás", "🌩", Colors.DAMAGE, 60, 5, 30, hero);
 	}
+	
+	@Override
+	public Tile generate() {
+		return this.hero.getEnemy().getLowestHpUnit().getTile();
+	}
 
 	@Override
-	public void cast() {
-		if (!this.hero.useManna(this.manna))
-			return;
-
+	public Tile scan() {
 		Menu<Unit> menu = new BasicMenu<>("Támadható egységek: ", Game.menuView);
 		Hero enemy = this.hero.getEnemy();
 		for (Unit unit : enemy.getAliveUnits()) {
@@ -26,15 +29,23 @@ public class Thunderbolt extends Spell {
 				v -> {}, "%s", v -> v.icon));
 		}
 
-		Unit selectedUnit = menu.display();
+		return menu.display().getTile();
+	}
+
+	@Override
+	public void cast(Tile tile) {
+		if (!this.hero.useManna(this.manna))
+			return;
+
+		Unit unit = tile.getUnit();
 		int damage = (int)Math.round(this.getValue());
 
 		Hero hero = this.hero;
 		Game.logMessage("%s %s %s: -%d❤ -> -%ddb", 
-			hero, this.icon, selectedUnit,
-			damage, damage / selectedUnit.baseHealth);
+			hero, this.icon, unit,
+			damage, damage / unit.baseHealth);
 
-		selectedUnit.getTile().effect(Colors.RED, this.icon);
-		selectedUnit.takeDamage(damage);
+		unit.getTile().effect(Colors.RED, this.icon);
+		unit.takeDamage(damage);
 	}
 }

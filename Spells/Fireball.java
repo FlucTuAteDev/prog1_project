@@ -17,11 +17,20 @@ public class Fireball extends Spell {
 	}
 
 	@Override
-	public void cast() {
+	public Tile scan() {
+		return Console.scanTile();
+	}
+
+	@Override
+	public Tile generate() {
+		return this.hero.getEnemy().getLowestHpUnit().getTile();
+	}
+
+	@Override
+	public void cast(Tile tile) {
 		if (!this.hero.useManna(this.manna))
 			return;
 
-		Tile tile = Console.scanTile();
 		List<Tile> affectedTiles = new ArrayList<>(Arrays.asList(tile.getNeighbours()));
 		affectedTiles.add(tile);
 

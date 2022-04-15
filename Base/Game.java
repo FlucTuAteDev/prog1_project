@@ -3,15 +3,16 @@ package Base;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Random;
 
 import Base.Console.Alignment;
 import Board.Board;
 import Hero.Hero;
 import Hero.AI;
 import Hero.Player;
+import Menu.InitMenu;
+import Menu.Menu;
+import Menu.Items.MenuItem;
 import Units.*;
-import Utils.ThreadHelper;
 import View.View;
 import View.Colors.*;
 
@@ -22,10 +23,10 @@ public class Game {
 
 	public static final View player1View = new View(1, 1, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
 	public static final View player2View = new View(1, (Console.WIDTH + Board.WIDTH) / 2 + 2, (Console.WIDTH - Board.WIDTH) / 2 - 1, Board.HEIGHT);
-	public static final Hero player1 = new Player("Játékos", Colors.DARK_BLUE, player1View);
-	public static final Hero player2 = new AI("Kompútor", Colors.DARK_GREEN, player2View);
+	public static Hero player1 = new Player("Játékos", Colors.DARK_BLUE, player1View);
+	public static Hero player2;
 
-	public static Board	board = new Board(player1, player2);
+	public static Board	board = new Board();
 	public static List<Unit> units = new ArrayList<>();
 
 	public static class Constants {
@@ -36,6 +37,15 @@ public class Game {
 	}
 
 	public Game() {
+		// Select gamemode
+		Menu<Integer> gamemodeMenu = new InitMenu<>("Játékmód", new View(1, 1, Console.WIDTH, Console.HEIGHT));
+		gamemodeMenu.addItem(new MenuItem<Integer>(0, null, v -> {}, "Játékos vs Játékos"));
+		gamemodeMenu.addItem(new MenuItem<Integer>(1, null, v -> {}, "Játékos vs Gép"));
+
+		int mode = gamemodeMenu.display();
+		if (mode == 0) player2 = new Player("Játékos2", Colors.DARK_GREEN, player2View);
+		else if (mode == 1) player2 = new AI("Kompútor", Colors.DARK_GREEN, player2View);
+
 		player1.addUnit(new Farmer(player1));
 		player1.addUnit(new Archer(player1));
 		player1.addUnit(new Griff(player1));
@@ -48,39 +58,6 @@ public class Game {
 
 		units.addAll(player1.getUnits());
 		units.addAll(player2.getUnits());
-	}
-
-	private void placeRandom() {
-		board.draw();
-		Random rand = new Random();
-		
-		player1.setMoney(9999);
-		player1.getSpellValues().forEach(x -> x.setActive());
-		for (int i = 0; i < 9; i++) {
-			player1.getSkill("magic").buy();
-			player1.getSkill("intelligence").buy();
-		}
-		// user.getSkill("moral").addPoints(9);
-
-		for (Unit unit : player1.getUnits()) {
-			int row, col;
-			unit.setMaxCount(50);
-			do {
-				row = rand.nextInt(Board.ROWS);
-				col = rand.nextInt(0, 2);
-			} while (board.getTile(row, col).hasUnit());
-			unit.setTile(board.getTile(row, col));
-		}
-
-		for (Unit unit : player2.getUnits()) {
-			int row, col;
-			// unit.setMaxCount(50);
-			do {
-				row = rand.nextInt(Board.ROWS);
-				col = rand.nextInt(Board.COLS - 2, Board.COLS);
-			} while (board.getTile(row, col).hasUnit());
-			unit.setTile(board.getTile(row, col));
-		}
 	}
 
 	private void update() {
@@ -149,11 +126,13 @@ public class Game {
 
 	public void run() {
 		Console.clearScreen();
-		// player1.init();
+
+		player1.init();
 		player2.init();
 
-		// this.placeUnits();
-		this.placeRandom();
+		board.draw();
+		player1.placeUnits();
+		player2.placeUnits();
 
 		this.update();
 

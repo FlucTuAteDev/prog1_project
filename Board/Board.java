@@ -1,7 +1,6 @@
 package Board;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -9,12 +8,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
-import java.util.Map.Entry;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import Base.Console;
-import Hero.Hero;
 import Interfaces.Drawable;
 import Utils.Vector;
 import View.View;
@@ -29,15 +24,9 @@ public class Board implements Drawable {
 	public static final int BOARD_OFFSET = Console.WIDTH / 2 - WIDTH / 2;
 	public static final View view = new View(0, BOARD_OFFSET, WIDTH, HEIGHT);
 
-	private final Hero player;
-	private final Hero ai;
-
 	private Tile[][] board = new Tile[ROWS][COLS];
 
-	public Board(Hero player, Hero ai) {
-		this.player = player;
-		this.ai = ai;
-
+	public Board() {
 		// Generate tiles
 		for (int i = 0; i < ROWS; i++) {
 			for (int j = 0; j < COLS; j++) {
@@ -63,20 +52,6 @@ public class Board implements Drawable {
 
 	public Tile getTile(Vector pos) {
 		return board[pos.row][pos.col];
-	}
-	
-	private List<Tile> reconstructPath(Map<Tile, Tile> cameFrom, Tile current) {
-		List<Tile> path = new ArrayList<>();
-		path.add(current);
-
-		Set<Tile> keys = cameFrom.keySet();
-		while (keys.contains(current)) {
-			current = cameFrom.get(current);
-			path.add(current);
-		}
-		Collections.reverse(path);
-
-		return path;
 	}
 
 	private double heuristic(Tile tile, Tile dest) {

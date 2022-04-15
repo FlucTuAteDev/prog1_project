@@ -170,7 +170,7 @@ public class Player extends Hero {
 		if (!usedAbility) {
 			// Hero attacks
 			for (Unit attackableUnit : enemy.getAliveUnits()) {
-				heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, null,
+				heroAttackableMenu.addItem(new MenuItem<>(attackableUnit, actionMenu,
 					Colors.textFromBg(enemy.COLOR), 
 					enemy.COLOR, 
 					v -> {
@@ -184,7 +184,7 @@ public class Player extends Hero {
 			for (Spell spell : usableSpells) {
 				spellMenu.addItem(new MenuItem<>(spell, null,
 				v -> {
-					v.cast();
+					v.cast(v.scan());
 					usedAbility = true;
 				}, 
 				"%s - %s", v -> v.icon, v -> v.name));

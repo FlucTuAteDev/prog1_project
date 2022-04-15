@@ -1,5 +1,6 @@
 package Spells;
 
+import Board.Tile;
 import Hero.Hero;
 import View.Colors.RGB;
 
@@ -47,5 +48,7 @@ public abstract class Spell {
 		return true;
 	}
 
-	public abstract void cast();
+	public abstract void cast(Tile tile);
+	public abstract Tile generate();
+	public abstract Tile scan();
 }

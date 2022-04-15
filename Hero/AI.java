@@ -40,16 +40,22 @@ public class AI extends Hero {
 		}
 
 		// Buy spells
-		for (Spell spell : spells.values()) {
-			if (spell.price > spellBudget) break;
-			spellBudget -= spell.price;
-			spell.buy();
+		while (true) {
+			boolean bought = false;
+			for (Spell spell : spells.values()) {
+				if (spell.price > spellBudget) continue;
+				spellBudget -= spell.price;
+				spell.buy();
+				bought = true;
+			}
+			if (!bought) break;
 		}
 
 		outer:
 		while (true) {
 			for (Unit unit : this.units) {
 				if (unit.price > unitBudget) break outer;
+
 				unitBudget -= unit.price;
 				unit.buy(1);
 			}
@@ -72,23 +78,25 @@ public class AI extends Hero {
 		}
 	}
 
+	private Unit lowestHealth(List<Unit> units) {
+		return units.stream().min((a, b) -> a.getHealth() - b.getHealth()).get();
+	}
 	@Override
 	public void takeTurn(Unit unit) {
-		Hero hero = unit.hero;
 		ThreadHelper.sleep(Game.Constants.TURN_DELAY);
 
 		if (unit.attackableUnits().size() > 0) {
 			// Unit attack
-			Unit target = unit.attackableUnits().stream().min((a, b) -> a.getHealth() - b.getHealth()).get();
+			Unit target = lowestHealth(unit.attackableUnits());
 
 			unit.attack(target);
-			hero.usedUnit = true;
+			this.usedUnit = true;
 		} else {
 			int action = RandomHelper.getInt(2);
 			// Use unit
 			if (action == 0) {
 				// Move towards the unit with the lowest hp to the closest tile possible
-				Unit target = hero.getEnemy().getAliveUnits().stream().min((a, b) -> a.getHealth() - b.getHealth()).get();
+				Unit target = this.enemy.getLowestHpUnit();
 	
 				Tile start = unit.getTile();
 				Tile dest = target.getTile();
@@ -97,22 +105,30 @@ public class AI extends Hero {
 				// Path contains the destination and we strip that from the list
 				unit.move(path.subList(0, Math.min(unit.speed, path.size() - 1)));
 
-				hero.usedUnit = true;
+				this.usedUnit = true;
 			// Use hero
 			} else if (action == 1) {
 				int heroAction = RandomHelper.getInt(2);
 
-				// Use attack
+				// Attack
 				if (heroAction == 0) {
-					Unit target = RandomHelper.getRandomElement(this.getEnemyUnits());
+					Unit target = this.enemy.getLowestHpUnit();
 					this.attack(target);
-				// Use magic
 				} else if (heroAction == 1) {
-					Spell spell = RandomHelper.getRandomElement(this.getActiveSpells());
-					spell.cast();
+					Tile tile = null;
+					Spell spell = null;
+					List<Spell> activeSpells = this.getActiveSpells();
+
+					if (activeSpells.size() == 0) return;
+					do {
+						spell = RandomHelper.getRandomElement(activeSpells);
+						tile = spell.generate();
+					} while(tile == null);
+
+					spell.cast(tile);
 				}
-				
-				hero.usedAbility = true;
+
+				this.usedAbility = true;
 			}
 		}
 	}
