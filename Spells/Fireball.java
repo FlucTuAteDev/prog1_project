@@ -11,6 +11,9 @@ import Hero.Hero;
 import Units.Unit;
 import View.Colors.Colors;
 
+/**
+ * Defines how the fireball spell should behave
+ */
 public class Fireball extends Spell {
 	public Fireball(Hero hero) {
 		super("Tűzlabda", "🔥", Colors.DAMAGE, 120, 9, 20, hero);

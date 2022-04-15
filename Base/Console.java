@@ -12,6 +12,9 @@ import Utils.Functions.ConverterFunction;
 import View.View;
 import View.Colors.RGB;
 
+/**
+ * Handles interactions with the terminal
+ */
 public class Console {
 	public class ANSI {
 		public static final String ESC = "\u001b";
@@ -36,6 +39,15 @@ public class Console {
 		LEFT, CENTER, RIGHT
 	};
 
+	/**
+	 * Evaluates and prints {@code format} and prints it with {@code printfn}.
+	 * Aligns the text to {@code alignment} on {@code width}
+	 * @param alignment Left / Right / Center
+	 * @param width The width on which the alignment is done
+	 * @param printFn
+	 * @param format
+	 * @param args
+	 */
 	private static void printBase(Alignment alignment, int width, Consumer<String> printFn, String format,
 			Object... args) {
 		String str = String.format(format, args);
@@ -175,6 +187,7 @@ public class Console {
 	/**
 	 * Color manipulation
 	 */
+
 	public static void resetStyles() {
 		print(ANSI.RESET_COLORS);
 	}
@@ -254,6 +267,15 @@ public class Console {
 			return scanAndConvert(text, Game.inputView, converter, filters);
 	}
 
+	/**
+	 * Scans a tile from {@code stdin} within the given range
+	 * @param rMin Minimum row
+	 * @param rMax Maximum row
+	 * @param cMin Minimum column
+	 * @param cMax Maximum column
+	 * @param filters see: {@link Base.Console#scanAndConvert(String, View, ConverterFunction, Function...) scanAndConvert}
+	 * @return A tile satisfying the given range and filters
+	*/
 	@SafeVarargs
 	public static Tile scanTile(int rMin, int rMax, int cMin, int cMax, Function<Tile, String>... filters) {
 		// User input can range from min + 1 to max (1 based index)

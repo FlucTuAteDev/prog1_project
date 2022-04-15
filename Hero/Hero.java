@@ -189,9 +189,19 @@ public abstract class Hero implements Drawable {
 		return Colors.wrapWithColor(" " + this.name + " ", COLOR, TEXT_COLOR);
 	}
 
-	
+	/**
+	 * Defines how to initialize the properties of the hero
+	 */
 	public abstract void init();
-	public abstract void placeUnits();
-	public abstract void takeTurn(Unit unit);
 
+	/**
+	 * Defines how the the hero's units are placed on the board
+	 */
+	public abstract void placeUnits();
+
+	/**
+	 * Defines what the hero does in a turn with a unit
+	 * @param unit The unit to take turn with
+	 */
+	public abstract void takeTurn(Unit unit);
 }

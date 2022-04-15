@@ -3,6 +3,9 @@ package View.Colors;
 import Base.Console;
 import Base.Console.ANSI;
 
+/**
+ * Defines the used colors in the game and useful functions for handling colors
+ */
 public final class Colors {
 	public static final RGB WHITE = new RGB(255, 255, 255);
 	public static final RGB BLACK = new RGB(0, 0, 0);
@@ -27,18 +30,6 @@ public final class Colors {
 		return (L > 186) ? BLACK : WHITE;
 	}
 
-	public static String wrapWithColor(String str, RGB background, RGB foreground) {
-		return String.format("%s%s%s%s", 
-			Console.getBackground(background),
-			Console.getForeground(foreground), 
-			str, 
-			ANSI.RESET_COLORS);
-	}
-
-	public static String wrapWithColor(String str, RGB foreground) {
-		return wrapWithColor(str, null, foreground);
-	}
-
 	public static RGB brighten(RGB color, double fraction) {
         int red = (int) Math.round(Math.min(255, color.r + 255 * fraction));
         int green = (int) Math.round(Math.min(255, color.g + 255 * fraction));
@@ -47,6 +38,16 @@ public final class Colors {
         return new RGB(red, green, blue);
     }
 
+	public static String wrapWithColor(String str, RGB background, RGB foreground) {
+		return String.format("%s%s%s%s", 
+			Console.getBackground(background),
+			Console.getForeground(foreground), 
+			str, 
+			ANSI.RESET_COLORS);
+	}
+	public static String wrapWithColor(String str, RGB foreground) {
+		return wrapWithColor(str, null, foreground);
+	}
 	public static void setBgWithFg(RGB background) {
 		Console.setBackground(background);
 		Console.setForeground(textFromBg(background));

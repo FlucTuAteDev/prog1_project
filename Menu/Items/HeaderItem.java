@@ -6,6 +6,9 @@ import java.util.function.Supplier;
 import View.Colors.Colors;
 import View.Colors.RGB;
 
+/**
+ * Stores the headers attribues. Used especially in {@link Menu.InitMenu InitMenu}
+ */
 public class HeaderItem {
 	public final String text;
 	public final RGB background;

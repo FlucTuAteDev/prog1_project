@@ -1,5 +1,8 @@
 package View.Colors;
 
+/**
+ * RGB representation of a color
+ */
 public class RGB {
 	public int r;
 	public int g;

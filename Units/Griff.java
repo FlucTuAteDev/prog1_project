@@ -2,6 +2,9 @@ package Units;
 
 import Hero.Hero;
 
+/**
+ * Defines how a griff should behave
+ */
 public class Griff extends Unit {
 
 	public Griff(Hero hero) {

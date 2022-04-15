@@ -99,6 +99,13 @@ public class Tile implements Drawable {
 		return new Vector(a.row - b.row, a.col - b.col);
 	}
 
+	/**
+	 * Puts {@code rows} with background {@code color} on the tile and holds it there for {@link Game.Constants#EFFECT_TIME EFFECT_TIME} ms
+	 * After that it redraws the effected tiles
+	 * @param tiles
+	 * @param color
+	 * @param rows
+	 */
 	public static void effect(Collection<Tile> tiles, RGB color, String... rows) {
 		Colors.setBgWithFg(color);
 		for (Tile tile : tiles)
@@ -114,9 +121,15 @@ public class Tile implements Drawable {
 		Tile.effect(List.of(this), color, rows);
 	}
 	
+	/**
+	 * Draws {@rows} into the tile
+	 * 
+	 * @throws IllegalArgumentException if more rows were passed than what the tile can fit
+	 * @param rows
+	 */
 	public void draw(String... rows) {
 		if (rows.length > ROWS)
-			return;
+			throw new IllegalArgumentException("Too many rows for this tile");
 
 		for (int i = 0; i < rows.length; i++) {
 			setCursor(i, 0);

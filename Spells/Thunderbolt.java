@@ -8,6 +8,9 @@ import View.Colors.Colors;
 import Menu.*;
 import Menu.Items.MenuItem;
 
+/**
+ * Defines how the thunderbolt spell should behave
+ */
 public class Thunderbolt extends Spell {
 	public Thunderbolt(Hero hero) {
 		super("Villámcsapás", "🌩", Colors.DAMAGE, 60, 5, 30, hero);

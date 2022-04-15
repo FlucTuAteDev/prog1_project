@@ -4,6 +4,9 @@ import Base.Console;
 import Base.Console.Alignment;
 import Base.Console.MoveDirection;
 
+/**
+ * Handles console operations in a given range of the screen
+ */
 public class View {
 	public final int top;
 	public final int left;
@@ -39,9 +42,9 @@ public class View {
 	}
 
 	public void clearLine() {
-		Console.setCursorCol(0);
+		Console.setCursorCol(left);
 		print(this.eraser);
-		Console.setCursorCol(0);
+		Console.setCursorCol(left);
 	}
 	
 	public void print(String format, Object... args) {

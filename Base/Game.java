@@ -16,6 +16,9 @@ import Units.*;
 import View.View;
 import View.Colors.*;
 
+/**
+ * Handles the flow of the game
+ */
 public class Game {
 	public static final View actionView = new View(Board.HEIGHT + 2, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
 	public static final View menuView = new View(actionView.top + 1, 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT);
@@ -60,6 +63,9 @@ public class Game {
 		units.addAll(player2.getUnits());
 	}
 
+	/**
+	 * Runs the game loop
+	 */
 	private void update() {
 		// Sort the units by initiative
 		Collections.sort(units);
@@ -146,6 +152,11 @@ public class Game {
 	}
 
 	private static View errorView = new View(Console.HEIGHT, Console.WIDTH / 2 + 1, Console.WIDTH / 2, 1);
+	/**
+	 * Prints the given error message to {@link Base.Game#errorView errorView}
+	 * @param format
+	 * @param args
+	 */
 	public static void logError(String format, Object... args) {
 		errorView.clear();
 		Console.setForeground(Colors.RED);
@@ -160,6 +171,12 @@ public class Game {
 
 	static View messageView = new View(Board.HEIGHT + 2, Console.WIDTH / 2 + 1, Console.WIDTH / 2, Console.HEIGHT - Board.HEIGHT - 2);
 	private static List<String> messages = new ArrayList<>();
+	/**
+	 * Prints the given message to {@link #messageView messageView}
+	 * Scrolls the {@link #messageView messageView} in case of an overflow
+	 * @param format
+	 * @param args
+	 */
 	public static void logMessage(String format, Object... args) {
 		// If the messages overflow remove the first element
 		if (messages.size() == messageView.height) 

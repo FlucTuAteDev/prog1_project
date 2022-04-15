@@ -17,6 +17,9 @@ import View.View;
 import View.Colors.Colors;
 import View.Colors.RGB;
 
+/**
+ * A hero that is controlled by the player
+ */
 public class Player extends Hero {
 	Menu<Object> actionMenu = new BasicMenu<>("Lehetőségek:", Game.menuView);
 	Menu<Unit> unitAttackableMenu = new BasicMenu<>("Megtámadható egységek:", Game.menuView);

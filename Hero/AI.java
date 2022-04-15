@@ -13,6 +13,9 @@ import Utils.ThreadHelper;
 import View.View;
 import View.Colors.RGB;
 
+/**
+ * A hero that is controlled by the computer
+ */
 public class AI extends Hero {
 
 	public AI(String name, RGB color, View view) {

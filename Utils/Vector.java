@@ -1,5 +1,8 @@
 package Utils;
 
+/**
+ * Two dimensional vector with useful functions
+ */
 public class Vector {
 	public int row, col;
 

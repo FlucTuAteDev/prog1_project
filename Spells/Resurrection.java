@@ -10,6 +10,9 @@ import Menu.Items.MenuItem;
 import Units.Unit;
 import View.Colors.Colors;
 
+/**
+ * Defines how the resurrection spell should behave
+ */
 public class Resurrection extends Spell {
 	public Resurrection(Hero hero) {
 		super("Feltámasztás", "💉", Colors.HEAL, 120, 6, 50, hero);

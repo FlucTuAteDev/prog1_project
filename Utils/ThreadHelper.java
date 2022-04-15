@@ -2,6 +2,9 @@ package Utils;
 
 import Base.Game;
 
+/**
+ * A wrapper for {@link Thread}
+ */
 public class ThreadHelper {
 	// Nincs kedvem minden alkalommal try catch-be írni, kösz helo
 	public static void sleep(long millis) {

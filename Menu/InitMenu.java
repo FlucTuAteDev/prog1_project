@@ -5,6 +5,9 @@ import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
 import View.View;
 
+/**
+ * This menu takes up the whole screen and is used when initializing a {@link Hero.Player Player}
+ */
 public class InitMenu<T> extends Menu<T> {
 
 	public InitMenu(String name, View view) {

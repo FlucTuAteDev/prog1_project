@@ -3,6 +3,9 @@ import Base.Console;
 import Menu.Items.MenuItem;
 import View.View;
 
+/**
+ * This type of menu is used when asking for input during the game
+ */
 public class BasicMenu<T> extends Menu<T> {
 	public BasicMenu(String name, View view) {
 		super(name, view);
@@ -21,7 +24,7 @@ public class BasicMenu<T> extends Menu<T> {
 		
 			if (item.next != null)
 				item.next.display();
-				
+
 			return item.value;
 		}
 		// Display items with indices

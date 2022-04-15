@@ -14,6 +14,9 @@ import Interfaces.Drawable;
 import Utils.Vector;
 import View.View;
 
+/**
+ * Handles the state of the game board
+ */
 public class Board implements Drawable {
 	public static final int ROWS = 10;
 	public static final int CELL_ROWS = 2;
@@ -54,10 +57,22 @@ public class Board implements Drawable {
 		return board[pos.row][pos.col];
 	}
 
+	/**
+	 * Determines which tile is closer to the destination
+	 * @param tile
+	 * @param dest
+	 * @return The euclidean distance between {@code tile} and {@code dest}
+	 */
 	private double heuristic(Tile tile, Tile dest) {
 		return Tile.euclideanDistance(tile, dest);
 	}
 
+	/**
+	 * Finds the shortest path between {@code start} and {@code dest} using the A* algorithm
+	 * @param start Start tile
+	 * @param dest Destination tile
+	 * @return The shortest path as {@code List<Tile>}
+	 */
 	public List<Tile> findPath(Tile start, Tile dest) {
 		// Stores the previous tile of a tile on the shortest known pathó
 		Map<Tile, Tile> cameFrom = new HashMap<>();

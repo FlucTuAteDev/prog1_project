@@ -1,5 +1,8 @@
 package Hero;
 
+/**
+ * Handles the hero's skill points
+ */
 public class Skill {
 	public static final int MAX_SKILL = 10;
 

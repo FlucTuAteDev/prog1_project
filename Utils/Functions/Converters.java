@@ -2,6 +2,9 @@ package Utils.Functions;
 
 import Utils.Maths;
 
+/**
+ * Useful converters for {@link Base.Console#scanAndConvert(String, View.View, ConverterFunction, java.util.function.Function...) scanAndConvert}
+ */
 public class Converters {
 	public static ConverterFunction<String, Object> convertInt(int min, int max) {
 		return x -> {

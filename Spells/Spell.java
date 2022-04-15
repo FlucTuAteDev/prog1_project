@@ -4,6 +4,9 @@ import Board.Tile;
 import Hero.Hero;
 import View.Colors.RGB;
 
+/**
+ * Defines how a spell should behave
+ */
 public abstract class Spell {
 	public final String name;
 	public final String icon;
@@ -25,10 +28,6 @@ public abstract class Spell {
 		this.hero = hero;
 	}
 
-	public int osszed(int a, int b) {
-		return a + b;
-	}
-
 	public boolean isActive() {
 		return this.active;
 	}
@@ -48,7 +47,16 @@ public abstract class Spell {
 		return true;
 	}
 
+	/**
+	 * Cast the spell on the given {@code tile}
+	 */
 	public abstract void cast(Tile tile);
+	/**
+	 * Generates a tile to cast the spell on
+	 */
 	public abstract Tile generate();
+	/**
+	 * Scans a tile from the user to cast the spell on
+	 */
 	public abstract Tile scan();
 }

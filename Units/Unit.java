@@ -12,6 +12,9 @@ import Interfaces.Drawable;
 import Utils.ThreadHelper;
 import View.Colors.Colors;
 
+/**
+ * Defines how a unit's properties and how it should behave
+ */
 public abstract class Unit implements Comparable<Unit>, Drawable {
 	public final String name;
 	public final Hero hero;
@@ -54,6 +57,11 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public boolean canMoveOn(List<Tile> path) {
 		return path.size() <= speed;
 	}
+	/**
+	 * Moves the unit along the given path
+	 * @param path
+	 * @return true if the move can be done by this unit and false otherwise 
+	 */
 	public boolean move(List<Tile> path) {
 		if (!canMoveOn(path)) return false;
 
@@ -210,6 +218,14 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 		draw();
 	}
 
+	public boolean buy(int amount) {
+		int maxAmount = this.hero.getMoney() / this.price;
+
+		if (amount > maxAmount) return false;
+		this.setMaxCount(this.maxCount + amount);
+		return this.hero.takeMoney(amount * this.price);
+	}
+
 	@Override
 	public int compareTo(Unit other) {
 		// Descending order
@@ -231,14 +247,6 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 
 		this.tile.draw(this.icon, String.valueOf(this.getCount()));
 		Console.resetStyles();
-	}
-
-	public boolean buy(int amount) {
-		int maxAmount = this.hero.getMoney() / this.price;
-
-		if (amount > maxAmount) return false;
-		this.setMaxCount(this.maxCount + amount);
-		return this.hero.takeMoney(amount * this.price);
 	}
 
 	@Override

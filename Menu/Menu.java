@@ -7,6 +7,9 @@ import Menu.Items.HeaderItem;
 import Menu.Items.MenuItem;
 import View.View;
 
+/**
+ * Handles the displaying of the menu and the selection of the menuitems
+ */
 public abstract class Menu<T> {
 	protected List<MenuItem<T>> items;
 	protected List<HeaderItem> headers;
@@ -33,13 +36,5 @@ public abstract class Menu<T> {
 		this.items.clear();
 	}
 
-	/**
-	 * Calculates where put the cursor so that the text is in the middle assuming
-	 * the set console width
-	 * 
-	 * @param s
-	 * @return Where to put the cursor
-	 */
-	
 	public abstract T display();
 }
