@@ -192,6 +192,9 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	public int getHealth() {
 		return this.health;
 	}
+	public int getMaxHealth() {
+		return this.baseHealth * this.maxCount;
+	}
 
 	public boolean isDead() {
 		return this.health <= 0;

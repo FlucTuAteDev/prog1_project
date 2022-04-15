@@ -160,8 +160,8 @@ public abstract class Hero implements Drawable {
 
 		for (Unit unit : units) {
 			view.printlnAligned(Alignment.CENTER, 
-				Colors.wrapWithColor(" %-10s %s(%2d/%2d) ", this.COLOR, this.TEXT_COLOR), 
-				unit.name, unit.icon, unit.getCount(), unit.getMaxCount());
+				Colors.wrapWithColor(" %-10s %s(%4d/%4d) ", this.COLOR, this.TEXT_COLOR), 
+				unit.name, unit.icon, unit.getHealth(), unit.getMaxHealth());
 		}
 		
 		view.println("");
