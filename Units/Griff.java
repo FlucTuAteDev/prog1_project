@@ -6,9 +6,8 @@ import Hero.Hero;
  * Defines how a griff should behave
  */
 public class Griff extends Unit {
-
 	public Griff(Hero hero) {
-		super("Griff", "🦅", hero, 15, 4, 10, 30, 7, 15);
+		super("Griff", "🦅", "Végtelen visszatámadás", hero, 15, 4, 10, 30, 7, 15);
 	}
 
 	@Override

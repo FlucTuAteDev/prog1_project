@@ -15,9 +15,10 @@ import View.Colors.Colors;
  */
 public class Resurrection extends Spell {
 	public Resurrection(Hero hero) {
-		super("Feltámasztás", "💉", Colors.HEAL, 120, 6, 50, hero);
+		super("Feltámasztás", "💉", "Gyógyít egy egységet", Colors.HEAL, 120, 6, 50, hero);
 	}
 
+	@Override
 	public Tile generate() {
 		Unit unit = this.hero.getAliveUnits().stream()
 			.filter(x -> x.getHealth() != x.baseHealth * x.getMaxCount())

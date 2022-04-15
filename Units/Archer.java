@@ -9,7 +9,7 @@ import Hero.Hero;
  */
 public class Archer extends Unit {
 	public Archer(Hero hero) {
-		super("Íjász", "🏹", hero, 6, 2, 4, 7, 4, 9);
+		super("Íjász", "🏹", "Távoli támadás", hero, 6, 2, 4, 7, 4, 9);
 	}
 
 	@Override

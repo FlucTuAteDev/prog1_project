@@ -13,12 +13,13 @@ import Utils.ThreadHelper;
 import View.Colors.Colors;
 
 /**
- * Defines how a unit's properties and how it should behave
+ * Defines a unit's properties and how it should behave
  */
 public abstract class Unit implements Comparable<Unit>, Drawable {
 	public final String name;
-	public final Hero hero;
 	public final String icon;
+	public final String special;
+	public final Hero hero;
 	public final int price;
 	public final int minDamage;
 	public final int maxDamage;
@@ -36,10 +37,11 @@ public abstract class Unit implements Comparable<Unit>, Drawable {
 	
 	Random random = new Random();
 	
-	public Unit(String name, String icon, Hero hero, int price, int minDamage, int maxDamage, int baseHealth, int speed,
+	public Unit(String name, String icon, String special, Hero hero, int price, int minDamage, int maxDamage, int baseHealth, int speed,
 			int baseInitiative) {
 		this.name = name;
 		this.icon = icon;
+		this.special = special;
 		this.hero = hero;
 
 		this.price = price;

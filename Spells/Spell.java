@@ -10,6 +10,7 @@ import View.Colors.RGB;
 public abstract class Spell {
 	public final String name;
 	public final String icon;
+	public final String desc;
 	public final RGB color;
 	public final int price;
 	public final int manna;
@@ -18,9 +19,10 @@ public abstract class Spell {
 
 	private boolean active = false;
 
-	public Spell(String name, String icon, RGB color, int price, int manna, int multiplier, Hero hero) {
+	public Spell(String name, String icon, String desc, RGB color, int price, int manna, int multiplier, Hero hero) {
 		this.name = name;
 		this.icon = icon;
+		this.desc = desc;
 		this.color = color;
 		this.price = price;
 		this.manna = manna;

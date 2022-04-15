@@ -69,7 +69,7 @@ public class Player extends Hero {
 		mainMenu.addItem(new MenuItem<Object>(null, null, Colors.RED,
 				v -> {
 					// If no units were bought
-					if (Game.units.stream().allMatch(x -> x.getCount() == 0)) {
+					if (Game.getUnits().stream().allMatch(x -> x.getCount() == 0)) {
 						Game.logError("Legalább egy egységet vársárolni kell, mielőtt csatába mész!");
 						mainMenu.display();
 					}
@@ -94,13 +94,15 @@ public class Player extends Hero {
 			spellMenu.addItem(new MenuItem<>(spell, spellMenu,
 					v -> {
 						int spellPrice = v.price;
-						if (v.isActive() || !this.takeMoney(spellPrice))
+						if (v.isActive() || !this.takeMoney(spellPrice)) {
+							Game.logError("Ezt a varázslatot már megvetted!");
 							return;
+						}
 
 						v.setActive();
 					},
-					"%-15s (💲: %3s, 💪: %2s) %s",
-					v -> v.name, v -> v.price, v -> v.manna, v -> v.isActive() ? "✔" : "✖"));
+					"%-15s (💲: %3s, 💪: %2s 📜: %-30s) %s",
+					v -> v.name, v -> v.price, v -> v.manna, v -> v.desc, v -> v.isActive() ? "✔" : "✖"));
 		}
 		spellMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
 
@@ -112,21 +114,22 @@ public class Player extends Hero {
 		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "❤: Életérő"));
 		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🚀: Sebesség"));
 		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🙌: Kezdeményezés"));
+		unitMenu.addHeader(new HeaderItem(Colors.GRAY, "🤹: Speciális képesség"));
 		for (Unit unit : this.getUnits()) {
 			unitMenu.addItem(new MenuItem<>(unit, unitMenu,
 					v -> {
 						int maxAmount = v.hero.getMoney() / v.price;
 						if (maxAmount == 0) {
-							Game.logError("Nincs elég pénzed egy egységre sem!");
+							Game.logError("Nincs elég pénzed erre az egységre!");
 							return;
 						}
 
 						int amount = Console.scanInt("Darab", 0, maxAmount);
 						v.buy(amount);
 					},
-					"%-15s (💲: %2s, ⚔: %2s - %2s, ❤: %2s, 🚀: %2s, 🙌: %2s, %3s db)",
+					"%-15s (💲: %2s, ⚔: %2s - %2s, ❤: %2s, 🚀: %2s, 🙌: %2s, 🤹: %-25s %3s db)",
 					v -> v.name, v -> v.price, v -> v.minDamage, v -> v.maxDamage, v -> v.baseHealth, v -> v.speed,
-					v -> v.baseInitiative , Unit::getCount));
+					v -> v.baseInitiative, v -> v.special , Unit::getCount));
 		}
 		unitMenu.addItem(new MenuItem<>(null, mainMenu, Colors.RED, v -> {}, "Vissza"));
 
@@ -138,13 +141,12 @@ public class Player extends Hero {
 	public void placeUnits() {
 		// Asks the user where to draw each unit
 		for (Unit unit : this.getUnits()) {
-			// WARNING: DEBUG ONLY COMMENT
-			// if (unit.getCount().get() == 0) continue;
+			if (unit.getCount() == 0) continue;
 
 			Game.actionView.clear();
 			Console.println("Válaszd ki, hogy hova rakod: %s (%s, %d db)", unit.name, unit.icon, unit.getCount());
 
-			Tile tile = Console.scanTile(0, Board.ROWS, 0, 2, 
+			Tile tile = Console.scanTile(0, Board.ROWS, this.view.left == 1 ? 0 : Board.COLS - 2, this.view.left == 1 ? 2 : Board.COLS, 
 				x -> x.hasUnit() ? "Az adott cellán már tartózkodik egység" : null);
 
 			unit.setTile(tile);

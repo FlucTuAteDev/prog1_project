@@ -16,10 +16,7 @@ import Base.Console.Alignment;
 import Interfaces.Drawable;
 import Base.Game;
 
-import Spells.Fireball;
-import Spells.Resurrection;
-import Spells.Spell;
-import Spells.Thunderbolt;
+import Spells.*;
 import Units.Unit;
 import View.View;
 import View.Colors.Colors;
@@ -57,6 +54,7 @@ public abstract class Hero implements Drawable {
 
 		spells.put("fireball", new Fireball(this));
 		spells.put("resurrect", new Resurrection(this));
+		spells.put("drug", new Drug(this));
 		spells.put("thunderbolt", new Thunderbolt(this));
 	}
 

@@ -25,7 +25,7 @@ public class AI extends Hero {
 	@Override
 	public void init() {
 		this.setMoney(Game.Constants.AI_MONEY);
-		int skillBudget = this.money / 3;
+		int skillBudget = this.money / 5;
 		int spellBudget = RandomHelper.getRandomElement(List.of(60, 240, 300));
 		int unitBudget = this.money - skillBudget - spellBudget;
 
@@ -97,7 +97,7 @@ public class AI extends Hero {
 		} else {
 			int action = RandomHelper.getInt(2);
 			// Use unit
-			if (action == 0) {
+			if (action == 0 || this.usedAbility) {
 				// Move towards the unit with the lowest hp to the closest tile possible
 				Unit target = this.enemy.getLowestHpUnit();
 	

@@ -13,7 +13,7 @@ import Menu.Items.MenuItem;
  */
 public class Thunderbolt extends Spell {
 	public Thunderbolt(Hero hero) {
-		super("Villámcsapás", "🌩", Colors.DAMAGE, 60, 5, 30, hero);
+		super("Villámcsapás", "🌩", "Sebez egy egységet", Colors.DAMAGE, 60, 5, 30, hero);
 	}
 	
 	@Override

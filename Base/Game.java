@@ -30,7 +30,7 @@ public class Game {
 	public static Hero player2;
 
 	public static Board	board = new Board();
-	public static List<Unit> units = new ArrayList<>();
+	private static List<Unit> units = new ArrayList<>();
 
 	public static class Constants {
 		public static final int EFFECT_TIME = 1000;
@@ -52,11 +52,13 @@ public class Game {
 		player1.addUnit(new Farmer(player1));
 		player1.addUnit(new Archer(player1));
 		player1.addUnit(new Griff(player1));
+		player1.addUnit(new Dragon(player1));
 		player1.setEnemy(player2);
-
+		
 		player2.addUnit(new Farmer(player2));
 		player2.addUnit(new Archer(player2));
 		player2.addUnit(new Griff(player2));
+		player2.addUnit(new Dragon(player2));
 		player2.setEnemy(player1);
 
 		units.addAll(player1.getUnits());
@@ -147,8 +149,11 @@ public class Game {
 		Console.setCursorPosition(Console.HEIGHT, 0);
 	}
 
-	public List<Unit> getUnits() {
+	public static List<Unit> getUnits() {
 		return units;
+	}
+	public static List<Unit> getAliveUnits() {
+		return units.stream().filter(x -> !x.isDead()).toList();
 	}
 
 	private static View errorView = new View(Console.HEIGHT, Console.WIDTH / 2 + 1, Console.WIDTH / 2, 1);

@@ -16,7 +16,7 @@ import View.Colors.Colors;
  */
 public class Fireball extends Spell {
 	public Fireball(Hero hero) {
-		super("Tűzlabda", "🔥", Colors.DAMAGE, 120, 9, 20, hero);
+		super("Tűzlabda", "🔥", "3x3-as területen sebez", Colors.DAMAGE, 120, 9, 20, hero);
 	}
 
 	@Override
