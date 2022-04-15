@@ -42,8 +42,8 @@ public class Game {
 	public Game() {
 		// Select gamemode
 		Menu<Integer> gamemodeMenu = new InitMenu<>("Játékmód", new View(1, 1, Console.WIDTH, Console.HEIGHT));
-		gamemodeMenu.addItem(new MenuItem<Integer>(0, null, v -> {}, "Játékos vs Játékos"));
-		gamemodeMenu.addItem(new MenuItem<Integer>(1, null, v -> {}, "Játékos vs Gép"));
+		gamemodeMenu.addItem(new MenuItem<Integer>(0, null, v -> {}, "%-20s", v -> "Játékos vs Játékos"));
+		gamemodeMenu.addItem(new MenuItem<Integer>(1, null, v -> {}, "%-20s", v -> "Játékos vs Gép"));
 
 		int mode = gamemodeMenu.display();
 		if (mode == 0) player2 = new Player("Játékos2", Colors.DARK_GREEN, player2View);
